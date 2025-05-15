@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ferrari SF90</title>
+  <style>
+        .menu-options h4 {
+      color: #fff;
+      margin: 8px 0 4px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 4px;
+    }
+    :root {
+      --rojo-ferrari: #c30000;
+      --gris-fondo: #f4f4f4;
+      --negro: #111;
+      --blanco: #fff;
+      --sombra: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--gris-fondo);
+      color: var(--negro);
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--negro);
+      color: var(--blanco);
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .imagen {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .imagen img {
+      width: 100%;
+      max-width: 800px;
+      border-radius: 10px;
+      box-shadow: var(--sombra);
+      transition: transform 0.3s ease;
+    }
+
+    .imagen img:hover {
+      transform: scale(1.02);
+    }
+
+    h2 {
+      color: var(--rojo-ferrari);
+      margin-bottom: 10px;
+    }
+
+    .seccion {
+      margin-bottom: 30px;
+    }
+
+    .seccion p {
+      font-size: 1.1rem;
+    }
+
+    button {
+      background-color: var(--rojo-ferrari);
+      color: var(--blanco);
+      border: none;
+      padding: 12px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #990000;
+    }
+
+    #detalles {
+      display: none;
+      margin-top: 15px;
+      padding: 20px;
+      background-color: var(--blanco);
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    footer {
+      background-color: var(--negro);
+      color: #ccc;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+    }
+
+    .menu-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 999;
+    }
+
+    .menu-button {
+      width: 40px;
+      height: 40px;
+      background-color: var(--rojo-ferrari);
+      color: white;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 24px;
+      transition: background-color 0.3s ease;
+    }
+
+    .menu-options {
+      overflow: hidden;
+      background-color: var(--rojo-ferrari);
+      border-radius: 10px;
+      margin-top: 10px;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      transition: all 0.4s ease;
+    }
+
+    .menu-container:hover .menu-options {
+      width: 160px;
+      height: auto;
+      opacity: 1;
+      padding: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .menu-options a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
+    }
+
+    .menu-options a:hover {
+      background-color: #800000;
+    }
+
+    .menu-options h4 {
+      color: #fff;
+      margin: 8px 0 4px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Agencia Vazquez</h1>
+  <p>Ferrari SF90 Stradale</p>
+</header>
+
+<main>
+  <div class="imagen">
+    <img src="styles/ferrari.jpg" alt="Ferrari SF90" />
+  </div>
+
+  <section class="seccion">
+    <h2>Precio Estimado</h2>
+    <p><strong>Desde $10,000,000.00 MXN</strong></p>
+  </section>
+
+  <section class="seccion">
+    <button onclick="toggleDetalles()">Ver especificaciones</button>
+    <div id="detalles">
+      <h3>Especificaciones Técnicas</h3>
+      <ul>
+        <li>Motor V8 Biturbo 4.0L + 3 motores eléctricos</li>
+        <li>Potencia combinada: 986 hp</li>
+        <li>Transmisión automática de doble embrague 8 velocidades</li>
+        <li>0 a 100 km/h: 2.5 segundos</li>
+        <li>Tracción total (AWD)</li>
+        <li>Modo eléctrico con autonomía de hasta 25 km</li>
+        <li>Interior de lujo con materiales en fibra de carbono y cuero</li>
+        <li>Panel digital completo y asistencias de conducción avanzadas</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  &copy; 2025 Agencia Vazquez - Todos los derechos reservados.
+</footer>
+
+<script>
+  function toggleDetalles() {
+    const detalles = document.getElementById("detalles");
+    detalles.style.display = (detalles.style.display === "none" || detalles.style.display === "") 
+      ? "block" 
+      : "none";
+  }
+</script>
+<div class="menu-container">
+  <div class="menu-button">☰</div>
+  <div class="menu-options">
+    <a href="index.html">Inicio</a>
+    <h4>Catálogo</h4>
+    <a href="mustang.html">Mustang</a>
+    <a href="Silvia.html">Silvia</a>
+    <a href="camaro.html">Camaro</a>
+    <a href="ferrari.html">Ferrari</a>
+    <h4>otros</h4>
+    <a href="Servicios.html">servicios/contacto</a>
+  </div>
+</div>
+</body>
+</html>

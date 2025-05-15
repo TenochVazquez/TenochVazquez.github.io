@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Servicios y Contacto - Agencia Vazquez</title>
+  <style>
+    :root {
+      --rojo: #c30000;
+      --gris-fondo: #f4f4f4;
+      --negro: #111;
+      --blanco: #fff;
+      --sombra: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--gris-fondo);
+      color: var(--negro);
+      line-height: 1.7;
+    }
+
+    header {
+      background: var(--negro);
+      color: var(--blanco);
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h2 {
+      color: var(--rojo);
+      margin-bottom: 15px;
+      font-size: 2em;
+    }
+
+    p {
+      margin-bottom: 10px;
+    }
+
+    .section {
+      background: var(--blanco);
+      padding: 30px;
+      margin-bottom: 40px;
+      border-radius: 10px;
+      box-shadow: var(--sombra);
+    }
+
+    .servicio h3 {
+      color: var(--negro);
+      margin-top: 20px;
+      margin-bottom: 8px;
+      font-size: 1.3em;
+    }
+
+    .servicio p {
+      font-size: 1.05em;
+    }
+
+    .contacto form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .contacto input, .contacto textarea, .contacto select {
+      padding: 12px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .contacto button {
+      background-color: var(--rojo);
+      color: white;
+      padding: 12px;
+      font-size: 1em;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .contacto button:hover {
+      background-color: #990000;
+    }
+
+    footer {
+      background-color: var(--negro);
+      color: #ccc;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+    }
+
+    .menu-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 999;
+    }
+
+    .menu-button {
+      width: 40px;
+      height: 40px;
+      background-color: var(--rojo);
+      color: white;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 24px;
+      transition: background-color 0.3s ease;
+    }
+
+    .menu-options {
+      overflow: hidden;
+      background-color: var(--rojo);
+      border-radius: 10px;
+      margin-top: 10px;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      transition: all 0.4s ease;
+    }
+
+    .menu-container:hover .menu-options {
+      width: 180px;
+      height: auto;
+      opacity: 1;
+      padding: 10px;
+      box-shadow: var(--sombra);
+    }
+
+    .menu-options a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
+    }
+
+    .menu-options a:hover {
+      background-color: #800000;
+    }
+
+    .menu-options h4 {
+      color: #fff;
+      margin: 8px 0 4px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Agencia Vazquez</h1>
+  <p>Servicios especializados y atención personalizada</p>
+</header>
+
+<main>
+  <section class="section" id="servicios">
+    <div class="servicio">
+      <h2>Nuestros Servicios</h2>
+
+      <h3>Financiamiento Personalizado</h3>
+      <p>Te ofrecemos planes de financiamiento a tu medida, con tasas competitivas y opciones flexibles para que estrenes el auto de tus sueños sin complicaciones.</p>
+
+      <h3>Seguros para Autos Nuevos y Usados</h3>
+      <p>Protege tu inversión con nuestras alianzas con aseguradoras líderes. Contamos con paquetes completos de cobertura total o básica, según tus necesidades.</p>
+
+      <h3>Pruebas de Manejo Sin Compromiso</h3>
+      <p>Experimenta la conducción de tu próximo auto antes de decidir. Agenda tu prueba de manejo en línea o directamente en nuestras instalaciones.</p>
+
+      <h3>Taller Mecánico y Servicio Técnico</h3>
+      <p>Contamos con un taller profesional certificado, equipado con tecnología de punta para mantenimientos, diagnósticos y reparaciones de alta calidad.</p>
+
+      <h3>Compra y Venta de Autos Usados</h3>
+      <p>Compramos tu vehículo al mejor precio del mercado o te ayudamos a venderlo de manera rápida y segura. Todos nuestros autos usados son revisados y garantizados.</p>
+
+      <p style="margin-top: 20px;">
+        <strong>¿Deseas más información o agendar un servicio?</strong> <br>
+        Puedes comunicarte con nosotros o completar el siguiente formulario.
+      </p>
+    </div>
+  </section>
+
+  <section class="section contacto" id="contacto">
+    <h2>Formulario de Contacto</h2>
+    <form>
+      <input type="text" placeholder="Nombre completo" required />
+      <input type="email" placeholder="Correo electrónico" required />
+      <input type="tel" placeholder="Teléfono (opcional)" />
+      <select required>
+        <option value="">Seleccione un motivo</option>
+        <option value="financiamiento">Información sobre financiamiento</option>
+        <option value="prueba">Agendar prueba de manejo</option>
+        <option value="servicio">Solicitar servicio técnico</option>
+        <option value="venta">Venta de auto usado</option>
+        <option value="otro">Otro</option>
+      </select>
+      <textarea rows="5" placeholder="Escriba aquí su mensaje o consulta" required></textarea>
+      <button type="submit">Enviar Mensaje</button>
+    </form>
+  </section>
+</main>
+
+<footer>
+  &copy; 2025 Agencia Vazquez - Todos los derechos reservados.
+</footer>
+
+<div class="menu-container">
+  <div class="menu-button">☰</div>
+  <div class="menu-options">
+    <a href="index.html">Inicio</a>
+    <h4>Catálogo</h4>
+    <a href="mustang.html">Mustang</a>
+    <a href="Silvia.html">Silvia</a>
+    <a href="camaro.html">Camaro</a>
+    <a href="ferrari.html">Ferrari</a>
+  </div>
+</div>
+
+</body>
+</html>
