@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    /* ----- 1. CONFIGURACIÓN GENERAL Y VARIABLES ----- */
     :root {
       --azul-oscuro: #175292;
       --azul-medio: #18afb4;
@@ -38,18 +37,16 @@
     }
     h1, h2, h3 { font-family: var(--fuente-titulos); color: var(--azul-oscuro); }
     h1 {
-      font-size: clamp(2.5rem, 5vw, 4rem); /* Tipografía fluida */
+      font-size: clamp(2.5rem, 5vw, 4rem);
       margin-bottom: 0.5rem;
     }
 
-    /* Estilo de foco visible para accesibilidad */
     :focus-visible {
       outline: 3px solid var(--azul-medio);
       outline-offset: 3px;
       border-radius: 4px;
     }
 
-    /* ----- 2. HEADER Y NAVEGACIÓN ----- */
     header {
       text-align: center;
       padding: 120px 20px 60px;
@@ -71,7 +68,6 @@
     }
     nav a:hover { color: var(--dorado); transform: translateY(-2px); }
 
-    /* ----- 2.5 INTRODUCCIÓN ÉTICA ----- */
     .intro-container {
       max-width: 800px;
       margin: 2rem auto 4rem;
@@ -94,7 +90,6 @@
       margin-bottom: 0;
     }
 
-    /* ----- 3. LÍNEA DE TIEMPO (TIMELINE) ----- */
     .timeline {
       position: relative;
       width: 90%; max-width: 1000px;
@@ -154,7 +149,6 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     }
 
-    /* ----- 4. TARJETA FLIP Y CONTENIDO INTERNO ----- */
     .card {
       width: 100%; max-width: 300px; height: 380px;
       perspective: 1200px;
@@ -213,7 +207,6 @@
       background: var(--dorado-hover); transform: translateY(-3px);
     }
 
-    /* ----- 5. MODAL AVANZADO ----- */
     .modal {
       display: none; position: fixed; z-index: 2000;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -237,7 +230,6 @@
     }
     .close-btn:hover { color: var(--dorado); }
 
-    /* ----- 6. FOOTER ----- */
     footer {
         text-align: center;
         padding: 2rem;
@@ -246,7 +238,6 @@
         color: var(--blanco);
     }
 
-    /* ----- 7. RESPONSIVIDAD ----- */
     @media (max-width: 768px) {
       .intro-container {
         margin: 1rem auto 3rem;
@@ -397,20 +388,18 @@
 
   <script>
     (function() {
-      // --- ANIMACIÓN AL HACER SCROLL ---
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-visible');
           }
         });
-      }, { threshold: 0.1 }); // Se activa cuando el 10% del elemento es visible
+      }, { threshold: 0.1 });
 
       document.querySelectorAll('.filosofo').forEach(section => {
         observer.observe(section);
       });
 
-      // --- LÓGICA DEL MODAL (CON TRAMPA DE FOCO) ---
       const openModalButtons = document.querySelectorAll('[data-modal-target]');
       const mainContent = document.getElementById('main-content');
       let focusableElements = [];
@@ -418,7 +407,7 @@
       let lastFocusedElement = null;
 
       const openModal = (modal) => {
-        lastFocusedElement = document.activeElement; // Guarda el elemento enfocado antes de abrir
+        lastFocusedElement = document.activeElement;
         currentModal = modal;
         modal.setAttribute('aria-hidden', 'false');
         document.body.classList.add('modal-abierto');
@@ -440,7 +429,7 @@
         mainContent.setAttribute('aria-hidden', 'false');
         document.removeEventListener('keydown', handleFocusTrap);
         if (lastFocusedElement) {
-          lastFocusedElement.focus(); // Devuelve el foco al elemento original
+          lastFocusedElement.focus();
         }
         currentModal = null;
       };
@@ -451,12 +440,12 @@
         const firstFocusableElement = focusableElements[0];
         const lastFocusableElement = focusableElements[focusableElements.length - 1];
 
-        if (e.shiftKey) { // Si es Shift + Tab
+        if (e.shiftKey) {
           if (document.activeElement === firstFocusableElement) {
             lastFocusableElement.focus();
             e.preventDefault();
           }
-        } else { // Si es solo Tab
+        } else {
           if (document.activeElement === lastFocusableElement) {
             firstFocusableElement.focus();
             e.preventDefault();
