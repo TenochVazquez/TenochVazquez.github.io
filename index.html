@@ -10,8 +10,8 @@
   <style>
     /* ----- 1. CONFIGURACIÓN GENERAL Y VARIABLES ----- */
     :root {
-      --azul-oscuro: #08233f;
-      --azul-medio: #5295ec;
+      --azul-oscuro: #0D253F;
+      --azul-medio: #1f3c88;
       --dorado: #D4AF37;
       --dorado-hover: #EAC65A;
       --fondo: #F8F7F2;
@@ -60,7 +60,8 @@
       background: rgba(13, 37, 63, 0.85);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      display: flex; justify-content: center; gap: 40px;
+      display: flex; justify-content: center; gap: 30px; /* Reducido para más items */
+      flex-wrap: wrap; /* Permite que los items pasen a la siguiente línea si no caben */
       padding: 18px; z-index: 1000;
       border-bottom: 1px solid rgba(255,255,255,0.1);
     }
@@ -253,13 +254,14 @@
 
   <header>
     <h1>El Sendero Ético</h1>
-    <p>Un Viaje Interactivo por la Filosofía Clásica</p>
+    <p>Un Viaje Interactivo por la Filosofía Clásica y Helenística</p>
   </header>
   
   <nav>
     <a href="#socrates">Sócrates</a>
     <a href="#platon">Platón</a>
     <a href="#aristoteles">Aristóteles</a>
+    <a href="#epicuro">Epicuro</a>
   </nav>
 
   <main class="timeline" id="main-content">
@@ -305,6 +307,20 @@
         <button class="btn" data-modal-target="modal-aristoteles">Saber Más</button>
       </div>
     </section>
+
+    <section id="epicuro" class="filosofo">
+      <div class="filosofo-content">
+       <div class="card" tabindex="0">
+         <div class="card-inner">
+           <div class="card-front"><h2>Epicuro</h2><p>341 – 270 a.C.</p></div>
+           <div class="card-back"><h3>Ideas Clave</h3><ul><li>Búsqueda del placer</li><li>Ataraxia (paz mental)</li><li>Tetrafármaco</li></ul></div>
+         </div>
+       </div>
+       <blockquote>"La muerte no es nada para nosotros, pues mientras existimos, la muerte no está presente."</blockquote>
+       <div class="pregunta"><strong>Reflexiona:</strong> ¿Qué placeres sencillos podrías cultivar para alcanzar la serenidad?</div>
+       <button class="btn" data-modal-target="modal-epicuro">Saber Más</button>
+     </div>
+   </section>
     
   </main>
   
@@ -331,6 +347,13 @@
       <button class="close-btn" aria-label="Cerrar modal">&times;</button>
       <h2 id="titulo-aristoteles">Aristóteles</h2>
       <p>Alumno de Platón, tutor de Alejandro Magno. Desarrolló la lógica formal, la ética del término medio y contribuyó en casi todas las áreas del conocimiento.</p>
+    </div>
+  </div>
+  <div id="modal-epicuro" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="titulo-epicuro">
+    <div class="modal-content">
+      <button class="close-btn" aria-label="Cerrar modal">&times;</button>
+      <h2 id="titulo-epicuro">Epicuro</h2>
+      <p>Fundador de la escuela del epicureísmo. Su filosofía se centraba en la búsqueda de una vida feliz mediante la búsqueda inteligente de placeres, la ataraxia (ausencia de turbación) y la amistad.</p>
     </div>
   </div>
 
