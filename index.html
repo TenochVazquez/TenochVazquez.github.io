@@ -60,8 +60,8 @@
       background: rgba(13, 37, 63, 0.85);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      display: flex; justify-content: center; gap: 30px; /* Reducido para más items */
-      flex-wrap: wrap; /* Permite que los items pasen a la siguiente línea si no caben */
+      display: flex; justify-content: center; gap: 30px;
+      flex-wrap: wrap;
       padding: 18px; z-index: 1000;
       border-bottom: 1px solid rgba(255,255,255,0.1);
     }
@@ -71,6 +71,29 @@
     }
     nav a:hover { color: var(--dorado); transform: translateY(-2px); }
 
+    /* ----- 2.5 INTRODUCCIÓN ÉTICA ----- */
+    .intro-container {
+      max-width: 800px;
+      margin: 2rem auto 4rem;
+      padding: 2.5rem;
+      text-align: center;
+      background-color: var(--blanco);
+      border-radius: 8px;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.06);
+    }
+    .intro-container h2 {
+      margin-bottom: 1.5rem;
+      font-size: 2.2rem;
+    }
+    .intro-container p {
+      margin-bottom: 1rem;
+      font-size: 1.1em;
+      color: #555;
+    }
+    .intro-container p:last-child {
+      margin-bottom: 0;
+    }
+
     /* ----- 3. LÍNEA DE TIEMPO (TIMELINE) ----- */
     .timeline {
       position: relative;
@@ -78,7 +101,6 @@
       margin: 2rem auto 5rem;
       padding: 2rem 0;
     }
-    /* La línea central */
     .timeline::before {
       content: '';
       position: absolute;
@@ -91,7 +113,7 @@
       position: relative;
       width: 50%;
       padding: 1rem 40px;
-      opacity: 0; /* Estado inicial para animación */
+      opacity: 0;
       transform: translateY(50px);
       transition: opacity 0.6s ease-out, transform 0.6s ease-out;
     }
@@ -109,7 +131,6 @@
       padding-left: 80px;
       text-align: left;
     }
-    /* El punto en la línea de tiempo */
     .filosofo::after {
       content: '';
       position: absolute;
@@ -227,12 +248,16 @@
 
     /* ----- 7. RESPONSIVIDAD ----- */
     @media (max-width: 768px) {
+      .intro-container {
+        margin: 1rem auto 3rem;
+        padding: 1.5rem;
+      }
       .timeline::before {
-        left: 30px; /* Mueve la línea al borde */
+        left: 30px;
       }
       .filosofo {
         width: 100%;
-        padding-left: 70px; /* Espacio para la línea */
+        padding-left: 70px;
         padding-right: 15px;
       }
       .filosofo:nth-child(odd), .filosofo:nth-child(even) {
@@ -242,7 +267,7 @@
         text-align: left;
       }
       .filosofo::after {
-        left: 21px; /* Posiciona el punto sobre la línea */
+        left: 21px;
       }
       .filosofo:nth-child(odd)::after, .filosofo:nth-child(even)::after {
           left: 21px;
@@ -263,6 +288,19 @@
     <a href="#aristoteles">Aristóteles</a>
     <a href="#epicuro">Epicuro</a>
   </nav>
+
+  <section id="intro-etica" class="intro-container">
+    <h2>¿Qué es la Ética? El Origen de una Búsqueda</h2>
+    <p>
+      La palabra <strong>ética</strong> proviene del griego antiguo <em>"ethos"</em>, que significa "carácter", "costumbre" o "forma de ser". En esencia, la ética es la rama de la filosofía que se pregunta: <strong>¿cómo debemos vivir?</strong>
+    </p>
+    <p>
+      No se trata solo de un conjunto de reglas, sino de una profunda reflexión sobre lo que es moralmente bueno y malo, correcto e incorrecto. Explora los principios que guían nuestras decisiones, la naturaleza de la virtud y el camino hacia una vida plena y con propósito.
+    </p>
+    <p>
+      Los filósofos que encontrarás en este viaje no ofrecieron respuestas únicas, sino que iniciaron una conversación que resuena hasta hoy. Te invitamos a explorar sus ideas y a continuar esa búsqueda por ti mismo.
+    </p>
+  </section>
 
   <main class="timeline" id="main-content">
     
@@ -319,8 +357,8 @@
        <blockquote>"La muerte no es nada para nosotros, pues mientras existimos, la muerte no está presente."</blockquote>
        <div class="pregunta"><strong>Reflexiona:</strong> ¿Qué placeres sencillos podrías cultivar para alcanzar la serenidad?</div>
        <button class="btn" data-modal-target="modal-epicuro">Saber Más</button>
-     </div>
-   </section>
+      </div>
+    </section>
     
   </main>
   
@@ -388,7 +426,9 @@
         
         focusableElements = Array.from(modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'));
         const firstFocusableElement = focusableElements[0];
-        firstFocusableElement.focus();
+        if (firstFocusableElement) {
+          firstFocusableElement.focus();
+        }
 
         document.addEventListener('keydown', handleFocusTrap);
       };
