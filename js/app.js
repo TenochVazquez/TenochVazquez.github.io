@@ -1,7 +1,6 @@
 // Gestión de Sesión (Seguridad)
 export const Auth = {
     check() {
-        // Si no existe la sesión en sessionStorage, redirige al login
         if (!sessionStorage.getItem('sesionActiva')) {
             window.location.href = 'index.html';
         }
@@ -58,7 +57,7 @@ export const SalesDB = {
     }
 };
 
-// Función del Reloj en Tiempo Real
+// Reloj
 function updateClock() {
     const elTime = document.getElementById('time');
     const elDate = document.getElementById('dateText');

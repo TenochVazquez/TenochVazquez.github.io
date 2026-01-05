@@ -5,61 +5,50 @@
     <title>Inventario - La Cafeeleria</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .stock-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            justify-content: center;
-        }
-        .btn-stock {
-            width: 30px;
-            height: 30px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            background: white;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
+        .stock-control { display: flex; align-items: center; gap: 10px; justify-content: center; }
+        .btn-stock { 
+            width: 30px; height: 30px; border-radius: 5px; border: 1px solid #ddd; 
+            background: white; cursor: pointer; font-weight: bold; font-size: 18px;
         }
         .btn-stock:hover { background: #efe3d5; }
-        .btn-edit { background: none; border: none; cursor: pointer; font-size: 16px; margin-left: 10px; }
-        
-        /* Estilo para stock bajo */
-        .low-stock { background-color: #fff0f0; color: #d9534f; padding: 2px 6px; border-radius: 4px; }
-        .good-stock { color: #2b7a5d; }
+        .low-stock { color: red; font-weight: bold; }
+        .good-stock { color: green; font-weight: bold; }
+        table th, table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
     </style>
 </head>
-<body style="padding: 40px; background-color: #f4f1ee; font-family: Inter, sans-serif;">
+<body style="padding: 40px; background-color: #f4f1ee; font-family: sans-serif;">
     <div style="max-width: 1000px; margin: auto;">
         <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <div style="display:flex; align-items:center; gap:10px;">
                 <img src="img/Logo2.jpeg" style="width:50px;">
-                <h1 style="color: #4a3728;">Inventario de Productos</h1>
+                <h1>Inventario</h1>
             </div>
-            <a href="dashboard.html" class="btn btn-secondary">Volver</a>
+            <div style="display:flex; gap:10px;">
+                <a href="dashboard.html" class="btn btn-secondary">Volver</a>
+                <button onclick="window.logout()" style="background:#a13b2a; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer;">Cerrar Sesión</button>
+            </div>
         </header>
 
-        <section class="card" style="padding:25px; margin-bottom:20px; background: white; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-            <h3 style="margin-top:0; color: #8b7a6a;">Añadir Nuevo Producto</h3>
+        <section class="card" style="padding:25px; margin-bottom:20px; background:white; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
             <form id="formAdd" style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap:10px; align-items:end;">
-                <div><label>Categoría</label><input type="text" id="tipo" required style="width:100%; padding:8px; border-radius:5px; border:1px solid #ddd;"></div>
-                <div><label>Sabor/Variante</label><input type="text" id="sabor" required style="width:100%; padding:8px; border-radius:5px; border:1px solid #ddd;"></div>
-                <div><label>Precio</label><input type="number" id="p" step="0.1" required style="width:100%; padding:8px; border-radius:5px; border:1px solid #ddd;"></div>
-                <div><label>Stock Inicial</label><input type="number" id="s" required style="width:100%; padding:8px; border-radius:5px; border:1px solid #ddd;"></div>
-                <button type="submit" class="btn btn-primary" style="background:#2b7a5d; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">Añadir</button>
+                <div><label>Categoría</label><input type="text" id="tipo" required style="width:100%; padding:8px;"></div>
+                <div><label>Sabor</label><input type="text" id="sabor" required style="width:100%; padding:8px;"></div>
+                <div><label>Precio</label><input type="number" id="p" step="0.1" required style="width:100%; padding:8px;"></div>
+                <div><label>Stock</label><input type="number" id="s" required style="width:100%; padding:8px;"></div>
+                <button type="submit" class="btn btn-primary" style="padding:10px;">Añadir</button>
             </form>
         </section>
 
-        <div class="card" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+        <div class="card" style="background:white; border-radius:10px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
             <table id="invTable" style="width:100%; border-collapse: collapse;">
-                <thead style="background: #f8f1e9;">
+                <thead>
                     <tr>
-                        <th style="padding:15px; text-align:left;">Categoría</th>
-                        <th style="padding:15px; text-align:left;">Sabor</th>
-                        <th style="padding:15px; text-align:center;">Precio</th>
-                        <th style="padding:15px; text-align:center;">Stock Actual</th>
-                        <th style="padding:15px; text-align:center;">Gestión de Stock</th>
-                        <th style="padding:15px; text-align:center;">Acción</th>
+                        <th>Categoría</th>
+                        <th>Sabor</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th style="text-align:center">Gestión</th>
+                        <th>Acción</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -68,39 +57,54 @@
     </div>
 
     <script type="module">
-        import { InventoryDB } from './js/app.js';
+        import { InventoryDB, Auth } from './js/app.js';
+
+        // Verificar sesión al cargar
+        Auth.check();
 
         const render = () => {
             const data = InventoryDB.get();
-            document.querySelector('#invTable tbody').innerHTML = data.map(p => {
+            const tbody = document.querySelector('#invTable tbody');
+            tbody.innerHTML = data.map(p => {
                 const [cat, sab = "---"] = p.name.split(' - ');
-                const stockClass = p.stock < 5 ? 'low-stock' : 'good-stock';
-                
                 return `
-                    <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding:15px;">${cat}</td>
-                        <td style="padding:15px;">${sab}</td>
-                        <td style="padding:15px; text-align:center;">
-                            $${p.price.toFixed(2)}
-                            <button class="btn-edit" onclick="window.editPrice('${p.id}', ${p.price})" title="Editar precio">✏️</button>
-                        </td>
-                        <td style="padding:15px; text-align:center; font-weight:bold;" class="${stockClass}">
-                            ${p.stock}
-                        </td>
-                        <td style="padding:15px; text-align:center;">
-                            <div class="stock-control">
-                                <button class="btn-stock" onclick="window.updateStock('${p.id}', -1)">-</button>
-                                <button class="btn-stock" onclick="window.updateStock('${p.id}', 1)" style="background:#e1f3d8;">+</button>
-                            </div>
-                        </td>
-                        <td style="padding:15px; text-align:center;">
-                            <button onclick="window.del('${p.id}')" style="background:none; border:none; cursor:pointer;">❌</button>
-                        </td>
-                    </tr>`;
+                <tr>
+                    <td>${cat}</td>
+                    <td>${sab}</td>
+                    <td>$${p.price.toFixed(2)}</td>
+                    <td class="${p.stock < 5 ? 'low-stock' : 'good-stock'}">${p.stock}</td>
+                    <td>
+                        <div class="stock-control">
+                            <button class="btn-stock" onclick="window.modificarStock('${p.id}', -1)">-</button>
+                            <button class="btn-stock" onclick="window.modificarStock('${p.id}', 1)">+</button>
+                        </div>
+                    </td>
+                    <td><button onclick="window.del('${p.id}')" style="background:none; border:none; cursor:pointer; font-size:18px;">❌</button></td>
+                </tr>`;
             }).join('');
         };
 
-        // Función para añadir productos
+        // Hacer funciones globales para que los botones las encuentren
+        window.modificarStock = (id, cambio) => {
+            const inv = InventoryDB.get();
+            const producto = inv.find(p => p.id == id);
+            if (producto) {
+                const nuevoStock = Math.max(0, producto.stock + cambio);
+                InventoryDB.updateStock(id, nuevoStock);
+                render();
+            }
+        };
+
+        window.del = (id) => {
+            if (confirm("¿Eliminar este producto?")) {
+                const nuevoInv = InventoryDB.get().filter(x => x.id != id);
+                InventoryDB.save(nuevoInv);
+                render();
+            }
+        };
+
+        window.logout = () => Auth.logout();
+
         document.getElementById('formAdd').onsubmit = (e) => {
             e.preventDefault();
             const inv = InventoryDB.get();
@@ -113,38 +117,6 @@
             InventoryDB.save(inv); 
             e.target.reset(); 
             render();
-        };
-
-        // FUNCIÓN NUEVA: Actualizar Stock (+ o -)
-        window.updateStock = (id, change) => {
-            const inv = InventoryDB.get();
-            const item = inv.find(x => x.id === id);
-            if (item) {
-                item.stock = Math.max(0, item.stock + change); // No permite stock negativo
-                InventoryDB.save(inv);
-                render();
-            }
-        };
-
-        // FUNCIÓN NUEVA: Editar Precio
-        window.editPrice = (id, currentPrice) => {
-            const newPrice = prompt("Ingrese el nuevo precio:", currentPrice);
-            if (newPrice !== null && !isNaN(newPrice)) {
-                const inv = InventoryDB.get();
-                const item = inv.find(x => x.id === id);
-                if (item) {
-                    item.price = parseFloat(newPrice);
-                    InventoryDB.save(inv);
-                    render();
-                }
-            }
-        };
-
-        window.del = (id) => { 
-            if(confirm("¿Seguro que desea eliminar este producto del inventario?")) { 
-                InventoryDB.save(InventoryDB.get().filter(x => x.id != id)); 
-                render(); 
-            } 
         };
 
         render();
