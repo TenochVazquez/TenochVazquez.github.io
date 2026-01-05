@@ -7,21 +7,20 @@
 </head>
 <body style="padding: 40px; background-color: #f4f1ee;">
     <div style="max-width: 1000px; margin: auto;">
-        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <div style="display: flex; align-items: center; gap: 10px;"><img src="img/Logo2.jpeg" style="width: 50px;"><h1>Control de Inventario</h1></div>
-            <a href="dashboard.html" class="btn btn-secondary">Volver al Panel</a>
+        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div style="display:flex; align-items:center; gap:10px;"><img src="img/Logo2.jpeg" style="width:50px;"><h1>Inventario</h1></div>
+            <a href="dashboard.html" class="btn btn-secondary">Volver</a>
         </header>
-        <section class="card" style="padding: 25px;">
-            <h3>Añadir Producto</h3>
-            <form id="formAdd" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 10px; align-items: end;">
+        <section class="card" style="padding:25px; margin-bottom:20px;">
+            <form id="formAdd" style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap:10px; align-items:end;">
                 <div><label>Categoría</label><input type="text" id="tipo" required style="width:100%"></div>
                 <div><label>Sabor</label><input type="text" id="sabor" required style="width:100%"></div>
                 <div><label>Precio</label><input type="number" id="p" step="0.1" required style="width:100%"></div>
                 <div><label>Stock</label><input type="number" id="s" required style="width:100%"></div>
-                <button type="submit" class="btn btn-primary">Crear</button>
+                <button type="submit" class="btn btn-primary">Añadir</button>
             </form>
         </section>
-        <div class="card" style="margin-top:20px;"><table id="invTable" style="width: 100%;">
+        <div class="card"><table id="invTable" style="width:100%">
             <thead><tr><th>Categoría</th><th>Sabor</th><th>Precio</th><th>Stock</th><th>Acción</th></tr></thead>
             <tbody></tbody></table></div>
     </div>
@@ -31,9 +30,7 @@
             const data = InventoryDB.get();
             document.querySelector('#invTable tbody').innerHTML = data.map(p => {
                 const [cat, sab = "---"] = p.name.split(' - ');
-                return `<tr><td>${cat}</td><td>${sab}</td><td>$${p.price.toFixed(2)}</td>
-                <td style="font-weight:bold; color:${p.stock<5?'red':'green'}">${p.stock}</td>
-                <td><button onclick="window.del('${p.id}')">❌</button></td></tr>`;
+                return `<tr><td>${cat}</td><td>${sab}</td><td>$${p.price.toFixed(2)}</td><td style="font-weight:bold; color:${p.stock<5?'red':'green'}">${p.stock}</td><td><button onclick="window.del('${p.id}')">❌</button></td></tr>`;
             }).join('');
         };
         document.getElementById('formAdd').onsubmit = (e) => {
