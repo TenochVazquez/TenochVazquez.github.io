@@ -12,7 +12,8 @@
         .category-header::after { content: '▼'; font-size: 12px; transition: 0.3s; }
         .options-list { display: none; padding: 10px; border-top: 1px solid #eee; background: #fff; }
         .category-group.active .options-list { display: block; }
-        .flavor-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f9f9f9; cursor: pointer; }
+        .flavor-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f9f9f9; cursor: pointer; transition: 0.2s; }
+        .flavor-item:hover { background: #fdfaf8; padding-left: 20px; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { width: 400px; padding: 30px; border-radius: 15px; background: white; }
         @media print { body * { visibility: hidden; } #ticketPrint, #ticketPrint * { visibility: visible; } #ticketPrint { position: absolute; left: 0; top: 0; width: 100%; display: block !important; } }
@@ -22,10 +23,7 @@
     <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div style="display: flex; align-items: center; gap: 15px;">
             <img src="img/Logo2.jpeg" alt="Logo" style="width: 60px;">
-            <div>
-                <h1 style="margin:0">La Cafeeleria</h1>
-                <div style="font-size: 13px; color: #666;"><span id="dateText"></span> | <span id="time" style="font-weight:bold"></span></div>
-            </div>
+            <div><h1 style="margin:0">La Cafeeleria</h1><div style="font-size: 13px; color: #666;"><span id="dateText"></span> | <span id="time" style="font-weight:bold"></span></div></div>
         </div>
         <a href="dashboard.html" class="btn btn-secondary">Volver</a>
     </header>
@@ -36,11 +34,11 @@
             <h3>Cuenta</h3>
             <table id="cartTable" style="width:100%"><thead><tr><th>Producto</th><th>Cant</th><th>Total</th><th></th></tr></thead><tbody></tbody></table>
             <div style="margin-top:20px; border-top:2px solid #eee; padding-top:10px;">
-                <div style="display:flex; justify-content:space-between"><span>Subtotal:</span><span id="subText">$0.00</span></div>
+                <div style="display:flex; justify-content:space-between"><span>Subtotal:</span><span id="subtotalText">$0.00</span></div>
                 <div style="display:flex; justify-content:space-between"><span id="ivaLabel">IVA (0%):</span><span id="ivaText">$0.00</span></div>
                 <div style="display:flex; justify-content:space-between; font-size:22px; font-weight:bold;"><span>TOTAL:</span><span id="totalText">$0.00</span></div>
             </div>
-            <button onclick="window.abrirPago()" class="btn btn-primary" style="width:100%; margin-top:20px; height:50px">PAGAR</button>
+            <button onclick="window.abrirModalPago()" class="btn btn-primary" style="width:100%; margin-top:20px; height:50px">PAGAR</button>
         </aside>
     </div>
 
@@ -48,28 +46,23 @@
         <div class="card modal-content" id="modalMainContent">
             <h3 style="text-align:center">Finalizar Pago</h3>
             <div style="display:flex; justify-content:space-around; margin:20px 0;">
-                <label><input type="radio" name="metodo" value="Efectivo" checked onchange="window.actIVA(false)"> Efectivo</label>
-                <label><input type="radio" name="metodo" value="Tarjeta" onchange="window.actIVA(true)"> Tarjeta (8%)</label>
+                <label><input type="radio" name="metodo" value="Efectivo" checked onchange="window.actualizarIVA(false)"> Efectivo</label>
+                <label><input type="radio" name="metodo" value="Tarjeta" onchange="window.actualizarIVA(true)"> Tarjeta (8%)</label>
             </div>
-            <div id="divEfe" style="background:#f9f9f9; padding:15px; border-radius:10px">
-                <label>Recibido:</label><input type="number" id="recibido" style="width:100%; font-size:24px; text-align:center">
-            </div>
-            <div style="display:flex; gap:10px; margin-top:20px">
-                <button onclick="window.cerrarPago()" class="btn btn-secondary" style="flex:1">Atrás</button>
-                <button onclick="window.cobrar()" class="btn btn-primary" style="flex:1">Confirmar</button>
-            </div>
+            <div id="seccionEfectivo" style="background:#f9f9f9; padding:15px; border-radius:10px"><label>Recibido:</label><input type="number" id="montoRecibido" style="width:100%; font-size:24px; text-align:center"></div>
+            <div style="display:flex; gap:10px; margin-top:20px"><button onclick="window.cerrarModal()" class="btn btn-secondary" style="flex:1">Atrás</button><button onclick="window.confirmarVenta()" class="btn btn-primary" style="flex:1">Confirmar</button></div>
         </div>
     </div>
     <div id="ticketPrint" style="display:none"></div>
 
     <script type="module">
         import { InventoryDB, SalesDB } from './js/app.js';
-        let cart = [], ivaAct = false, inv = [];
-        
-        async function load() { inv = InventoryDB.get(); render(); }
-        function render() {
+        let cart = [], aplicarIVA = false, inventario = [];
+
+        function renderMenu() {
+            inventario = InventoryDB.get();
             const grupos = {};
-            inv.forEach(p => {
+            inventario.forEach(p => {
                 const [cat, sab = "Clásico"] = p.name.split(' - ');
                 if (!grupos[cat]) grupos[cat] = [];
                 grupos[cat].push({ ...p, sabor: sab });
@@ -77,42 +70,51 @@
             document.getElementById('menuDesplegable').innerHTML = Object.keys(grupos).map(cat => `
                 <div class="category-group" id="g-${cat.replace(/\s/g,'')}">
                     <div class="category-header" onclick="document.getElementById('g-${cat.replace(/\s/g,'')}').classList.toggle('active')">${cat}</div>
-                    <div class="options-list">${grupos[cat].map(i => `<div class="flavor-item" onclick="window.add('${i.id}')"><span>${i.sabor}</span><strong>$${i.price.toFixed(2)}</strong></div>`).join('')}</div>
+                    <div class="options-list">${grupos[cat].map(i => `<div class="flavor-item" onclick="window.addToCart('${i.id}')"><span>${i.sabor}</span><strong>$${i.price.toFixed(2)}</strong></div>`).join('')}</div>
                 </div>`).join('');
         }
-        window.add = (id) => {
-            const p = inv.find(x => x.id == id);
-            if(!p || p.stock <= 0) return alert("Sin stock");
-            const item = cart.find(x => x.id == id);
-            if(item) item.qty++; else cart.push({...p, qty:1});
-            window.calc();
+
+        window.addToCart = (id) => {
+            const p = inventario.find(x => x.id == id);
+            if(!p || p.stock <= 0) return alert("Sin existencias");
+            const inCart = cart.find(x => x.id == id);
+            if (inCart) inCart.qty++; else cart.push({ ...p, qty: 1 });
+            window.actualizarCalculos();
         };
-        window.calc = () => {
-            const sub = cart.reduce((s,i) => s+(i.qty*i.price),0), iva = ivaAct?sub*0.08:0, tot = sub+iva;
-            document.querySelector('#cartTable tbody').innerHTML = cart.map(i => `<tr><td>${i.name}</td><td style="text-align:center">${i.qty}</td><td>$${(i.qty*i.price).toFixed(2)}</td><td><button onclick="window.rem('${i.id}')">✕</button></td></tr>`).join('');
-            document.getElementById('subText').textContent = `$${sub.toFixed(2)}`;
+
+        window.actualizarCalculos = () => {
+            const sub = cart.reduce((s, i) => s + (i.qty * i.price), 0), iva = aplicarIVA ? sub * 0.08 : 0, tot = sub + iva;
+            document.querySelector('#cartTable tbody').innerHTML = cart.map(i => `<tr><td>${i.name}</td><td style="text-align:center">${i.qty}</td><td>$${(i.qty*i.price).toFixed(2)}</td><td><button onclick="window.removeFromCart('${i.id}')">✕</button></td></tr>`).join('');
+            document.getElementById('subtotalText').textContent = `$${sub.toFixed(2)}`;
             document.getElementById('ivaText').textContent = `$${iva.toFixed(2)}`;
             document.getElementById('totalText').textContent = `$${tot.toFixed(2)}`;
-            document.getElementById('recibido').value = tot.toFixed(2);
+            document.getElementById('montoRecibido').value = tot.toFixed(2);
         };
-        window.cobrar = () => {
-            const sub = cart.reduce((s,i) => s+(i.qty*i.price),0), iva = ivaAct?sub*0.08:0, tot = sub+iva;
-            const rec = parseFloat(document.getElementById('recibido').value), cam = rec - tot;
-            if(cam < 0 && !ivaAct) return alert("Monto insuficiente");
-            SalesDB.save({ items: cart, total: tot, subtotal: sub, iva, metodo: ivaAct?'Tarjeta':'Efectivo' });
+
+        window.confirmarVenta = () => {
+            const sub = cart.reduce((s, i) => s + (i.qty * i.price), 0), iva = aplicarIVA ? sub * 0.08 : 0, tot = sub + iva;
+            const rec = parseFloat(document.getElementById('montoRecibido').value), cam = rec - tot;
+            if (cam < 0 && !aplicarIVA) return alert("Monto insuficiente");
+            SalesDB.save({ metodo: aplicarIVA?'Tarjeta':'Efectivo', items: [...cart], subtotal: sub, iva, total: tot });
             cart.forEach(i => InventoryDB.updateStock(i.id, i.stock - i.qty));
-            document.getElementById('modalMainContent').innerHTML = `<div style="text-align:center"><h2>VENTA EXITOSA</h2><h1>CAMBIO: $${cam.toFixed(2)}</h1><button onclick="window.imprimir(${tot},${cam})" class="btn btn-primary">TICKET</button></div>`;
+            document.getElementById('modalMainContent').innerHTML = `<div style="text-align:center"><h2>VENTA EXITOSA</h2><h1>CAMBIO: $${cam.toFixed(2)}</h1><button onclick="window.imprimirTicket(${sub},${iva},${tot},${rec},${cam})" class="btn btn-primary">IMPRIMIR TICKET</button></div>`;
         };
-        window.imprimir = (tot, cam) => {
-            const items = cart.map(i => `<div>${i.qty} x ${i.name} - $${(i.qty*i.price).toFixed(2)}</div>`).join('');
-            document.getElementById('ticketPrint').innerHTML = `<div style="text-align:center; width:280px; font-family:monospace; padding:20px; background:white;"><img src="img/Logo2.jpeg" style="width:60px;"><br><strong>LA CAFEELERIA</strong><hr>${items}<hr>Total: $${tot.toFixed(2)}<br>Cambio: $${cam.toFixed(2)}</div>`;
+
+        window.imprimirTicket = (sub, iva, tot, rec, cam) => {
+            const items = cart.map(i => `<div style="display:flex; justify-content:space-between"><span>${i.qty} x ${i.name.split(' - ')[1] || i.name}</span><span>$${(i.qty*i.price).toFixed(2)}</span></div>`).join('');
+            document.getElementById('ticketPrint').innerHTML = `
+                <div style="width:280px; margin:auto; padding:20px; background:#fff; font-family:'Courier New',monospace; border:1px solid #eee; text-align:center;">
+                    <img src="img/Logo2.jpeg" style="width:60px;"><br><strong>LA CAFEELERIA</strong><hr>${items}<hr>
+                    <div style="text-align:right">SUBTOTAL: $${sub.toFixed(2)}<br>TOTAL: $${tot.toFixed(2)}<br>PAGO: $${rec.toFixed(2)}<br>CAMBIO: $${cam.toFixed(2)}</div>
+                </div>`;
             window.print(); window.location.reload();
         };
-        window.rem = (id) => { cart = cart.filter(i => i.id != id); window.calc(); };
-        window.actIVA = (s) => { ivaAct = s; document.getElementById('divEfe').style.display = s?'none':'block'; window.calc(); };
-        window.abrirPago = () => { if(cart.length) document.getElementById('modalPago').style.display='flex'; };
-        window.cerrarPago = () => document.getElementById('modalPago').style.display='none';
-        load();
+
+        window.removeFromCart = (id) => { cart = cart.filter(x => x.id != id); window.actualizarCalculos(); };
+        window.actualizarIVA = (s) => { aplicarIVA = s; document.getElementById('seccionEfectivo').style.display = s?'none':'block'; window.actualizarCalculos(); };
+        window.abrirModalPago = () => { if(cart.length) document.getElementById('modalPago').style.display='flex'; };
+        window.cerrarModal = () => document.getElementById('modalPago').style.display='none';
+        renderMenu();
     </script>
 </body>
 </html>
