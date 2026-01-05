@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Panel Principal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding: 20px; }
+        .menu-card { cursor: pointer; text-align: center; transition: 0.3s; }
+        .menu-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .icon { font-size: 40px; margin-bottom: 10px; }
+    </style>
+</head>
+<body style="padding: 20px;">
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 0 20px;">
+        <div><h1>☕ Cafetería</h1><p>Bienvenido al sistema</p></div>
+        <div class="card" style="padding: 10px 20px; text-align: right;">
+            <div id="time" style="font-weight: bold;">--:--</div>
+            <div id="date" style="font-size: 12px; color: var(--muted);">--</div>
+        </div>
+    </header>
+
+    <div class="grid">
+        <div class="card menu-card" onclick="location.href='pos.html'">
+            <div class="icon">🧾</div>
+            <h3>Venta Rápida</h3>
+            <p>Cobrar productos</p>
+        </div>
+        <div class="card menu-card" onclick="location.href='inventario.html'">
+            <div class="icon">📦</div>
+            <h3>Inventario</h3>
+            <p>Stock y Precios</p>
+        </div>
+        <div class="card menu-card" onclick="location.href='Reportes.html'">
+            <div class="icon">📊</div>
+            <h3>Reportes</h3>
+            <p>Ver historial</p>
+        </div>
+    </div>
+    <script src="js/app.js"></script>
+</body>
+</html>

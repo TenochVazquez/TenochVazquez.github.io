@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Caja - La Cafeeleria</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .pos-container { display: grid; grid-template-columns: 1fr 400px; gap: 20px; }
+        .grid-prods { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+        .prod-card { text-align: center; border: 1px solid #eee; cursor: pointer; padding: 15px; }
+        .prod-card:hover { border-color: var(--accent); background: var(--bg-panel); transform: translateY(-2px); transition: 0.2s; }
+        
+        /* Botones de edición en la tabla */
+        .qty-btn { padding: 2px 8px; margin: 0 2px; border-radius: 4px; border: 1px solid #ddd; background: #f8f8f8; cursor: pointer; }
+        .qty-btn:hover { background: var(--accent-light); }
+        .del-btn { color: #a13b2a; border: none; background: none; cursor: pointer; font-weight: bold; }
+
+        .modal-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); 
+            display: none; align-items: center; justify-content: center; z-index: 1000; 
+        }
+        .modal-content { width: 400px; padding: 30px; border-radius: 15px; background: white; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #ticketPrint, #ticketPrint * { visibility: visible; }
+            #ticketPrint { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+        }
+    </style>
+</head>
+<body style="padding: 20px;">
+
+    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="img/logo.png" alt="Logo" style="width: 50px;">
+            <div>
+                <h1 style="margin:0">La Cafeeleria</h1>
+                <p id="dateText" style="margin:0; color:var(--muted); font-size:12px"></p>
+            </div>
+        </div>
+        <a href="dashboard.html" class="btn btn-secondary">Volver al Menú</a>
+    </header>
+
+    <div class="pos-container">
+        <section class="card">
+            <h3>Menú</h3>
+            <div id="prodGrid" class="grid-prods"></div>
+        </section>
+
+        <aside class="card">
+            <h3>Cuenta</h3>
+            <table id="cartTable">
+                <thead>
+                    <tr>
+                        <th>Prod.</th>
+                        <th>Cant.</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            
+            <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px; font-size: 14px;">
+                <div style="display:flex; justify-content: space-between;"><span>Subtotal:</span><span id="subtotalText">$0.00</span></div>
+                <div style="display:flex; justify-content: space-between;"><span id="ivaLabel">IVA (0%):</span><span id="ivaText">$0.00</span></div>
+                <div style="display:flex; justify-content: space-between; font-size: 18px; font-weight: bold; margin-top: 5px; color: var(--accent-dark);">
+                    <span>TOTAL:</span><span id="totalText">$0.00</span>
+                </div>
+            </div>
+
+            <button onclick="abrirModalPago()" class="btn btn-primary" style="width: 100%; margin-top: 20px; height: 50px; font-size: 18px;">PAGAR</button>
+        </aside>
+    </div>
+
+    <div id="modalPago" class="modal-overlay">
+        <div class="card modal-content" id="modalMainContent">
+            <h3 style="margin-top:0">Finalizar Venta</h3>
+            <div style="margin-bottom: 15px;">
+                <label><input type="radio" name="metodo" value="Efectivo" checked onchange="actualizarIVA(false)"> 💵 Efectivo</label>
+                <label style="margin-left:15px"><input type="radio" name="metodo" value="Tarjeta" onchange="actualizarIVA(true)"> 💳 Tarjeta</label>
+            </div>
+
+            <div id="seccionEfectivo" style="margin-top: 15px; background: #f9f9f9; padding: 10px; border-radius: 8px;">
+                <label style="font-size: 12px;">Monto Recibido:</label>
+                <input type="number" id="montoRecibido" style="width:100%; font-size: 20px;" step="0.01">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="cerrarModal()" class="btn btn-secondary" style="flex:1">Atrás</button>
+                <button onclick="confirmarVenta()" class="btn btn-primary" style="flex:1">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ticketPrint" style="display:none;"></div>
+
+    <script src="js/app.js"></script>
+    <script>
+        let cart = [];
+        let aplicarIVA = false; 
+        const IVA_RATE = 0.08; 
+        let inventarioActual = InventoryDB.get();
+
+        document.getElementById('dateText').textContent = new Date().toLocaleDateString();
+
+        function renderProds() {
+            const grid = document.getElementById('prodGrid');
+            grid.innerHTML = inventarioActual.map(p => `
+                <div class="card prod-card" onclick="addToCart(${p.id})">
+                    <strong>${p.name}</strong><br>
+                    <span style="color:var(--accent-dark); font-weight:bold">$${p.price.toFixed(2)}</span><br>
+                    <small>Stock: ${p.stock}</small>
+                </div>
+            `).join('');
+        }
+
+        window.addToCart = (id) => {
+            const p = inventarioActual.find(x => x.id === id);
+            if(p.stock <= 0) return alert("Sin stock");
+            const inCart = cart.find(x => x.id === id);
+            if (inCart) {
+                if(inCart.qty < p.stock) inCart.qty++;
+                else alert("Máximo stock disponible alcanzado");
+            } else {
+                cart.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
+            }
+            actualizarCalculos();
+        };
+
+        window.changeQty = (id, delta) => {
+            const item = cart.find(x => x.id === id);
+            const p = inventarioActual.find(x => x.id === id);
+            if (item) {
+                if (delta > 0 && item.qty >= p.stock) return alert("Sin más stock");
+                item.qty += delta;
+                if (item.qty <= 0) removeFromCart(id);
+                else actualizarCalculos();
+            }
+        };
+
+        window.removeFromCart = (id) => {
+            cart = cart.filter(x => x.id !== id);
+            actualizarCalculos();
+        };
+
+        window.actualizarIVA = (estado) => {
+            aplicarIVA = estado;
+            document.getElementById('seccionEfectivo').style.display = estado ? 'none' : 'block';
+            actualizarCalculos();
+        }
+
+        function actualizarCalculos() {
+            const body = document.querySelector('#cartTable tbody');
+            body.innerHTML = cart.map(i => `
+                <tr>
+                    <td>${i.name}</td>
+                    <td>
+                        <button class="qty-btn" onclick="changeQty(${i.id}, -1)">-</button>
+                        ${i.qty}
+                        <button class="qty-btn" onclick="changeQty(${i.id}, 1)">+</button>
+                    </td>
+                    <td>$${(i.qty * i.price).toFixed(2)}</td>
+                    <td><button class="del-btn" onclick="removeFromCart(${i.id})">✕</button></td>
+                </tr>
+            `).join('');
+            
+            const subtotal = cart.reduce((s, i) => s + (i.qty * i.price), 0);
+            const iva = aplicarIVA ? (subtotal * IVA_RATE) : 0;
+            const total = subtotal + iva;
+
+            document.getElementById('subtotalText').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('ivaLabel').textContent = `IVA (${aplicarIVA ? '8%' : '0%'}):`;
+            document.getElementById('ivaText').textContent = `$${iva.toFixed(2)}`;
+            document.getElementById('totalText').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('montoRecibido').value = total.toFixed(2);
+        }
+
+        window.abrirModalPago = () => cart.length > 0 ? document.getElementById('modalPago').style.display='flex' : alert("Cuenta vacía");
+        window.cerrarModal = () => document.getElementById('modalPago').style.display='none';
+
+        window.confirmarVenta = () => {
+            const metodo = document.querySelector('input[name="metodo"]:checked').value;
+            const subtotal = cart.reduce((s, i) => s + (i.qty * i.price), 0);
+            const iva = aplicarIVA ? (subtotal * IVA_RATE) : 0;
+            const total = subtotal + iva;
+            const montoRec = parseFloat(document.getElementById('montoRecibido').value) || 0;
+
+            if (metodo === 'Efectivo' && montoRec < total) return alert(`Faltan $${(total - montoRec).toFixed(2)}`);
+
+            const cambio = metodo === 'Efectivo' ? (montoRec - total) : 0;
+
+            SalesDB.save({ metodo, items: [...cart], subtotal, iva, total, recibido: montoRec, cambio });
+
+            cart.forEach(item => {
+                const p = inventarioActual.find(x => x.id === item.id);
+                if (p) p.stock -= item.qty;
+            });
+            InventoryDB.save(inventarioActual);
+
+            const modalMain = document.getElementById('modalMainContent');
+            modalMain.innerHTML = `
+                <div style="text-align:center">
+                    <h2 style="color:#2b7a5d">VENTA EXITOSA</h2>
+                    <div style="background:#f0f9f4; padding:20px; border-radius:10px; margin:15px 0; border: 1px solid #2b7a5d">
+                        <p style="margin:0; font-size:14px; color:#2b7a5d">CAMBIO A DEVOLVER:</p>
+                        <h1 style="margin:5px 0; font-size:48px; color:#1b5e20">$${cambio.toFixed(2)}</h1>
+                    </div>
+                    <button onclick="generarTicket(${subtotal}, ${iva}, ${total}, '${metodo}', ${montoRec}, ${cambio})" class="btn btn-primary" style="width:100%">Imprimir Ticket</button>
+                </div>
+            `;
+        };
+
+        function generarTicket(sub, iva, tot, met, rec, cam) {
+            const ticket = document.getElementById('ticketPrint');
+            const itemsHtml = cart.map(i => `<div style="display:flex;justify-content:space-between"><span>${i.qty} x ${i.name}</span><span>$${(i.qty*i.price).toFixed(2)}</span></div>`).join('');
+
+            ticket.innerHTML = `
+                <div style="text-align:center; font-family:monospace; width:280px; margin:auto; border:1px solid #000; padding:10px">
+                    <img src="img/logo.png" style="width:60px; filter:grayscale(100%)">
+                    <h3>LA CAFEELERIA</h3>
+                    <p style="font-size:10px">${new Date().toLocaleString()}</p>
+                    <hr>
+                    ${itemsHtml}
+                    <hr>
+                    <div style="text-align:right">
+                        <p>Subtotal: $${sub.toFixed(2)}</p>
+                        ${iva > 0 ? `<p>IVA (8%): $${iva.toFixed(2)}</p>` : ''}
+                        <p><strong>TOTAL: $${tot.toFixed(2)}</strong></p>
+                        <p>Pago: ${met}</p>
+                        ${met === 'Efectivo' ? `<p>Cambio: $${cam.toFixed(2)}</p>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            ticket.style.display = 'block';
+            setTimeout(() => { window.print(); location.reload(); }, 500);
+        }
+
+        renderProds();
+    </script>
+</body>
+</html>

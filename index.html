@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Login</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .login-card { width: 100%; max-width: 400px; text-align: center; }
+        .logo-login { font-size: 60px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+<main class="card login-card">
+    <img src="img/Logo.png" alt="La Cafeeleria Logo" style="width: 150px; margin-bottom: 10px;">
+    <h1>Administración</h1>
+        <p style="color: var(--muted); margin-bottom: 20px;">Inicie sesión para continuar</p>
+        
+        <form id="loginForm" style="display: grid; gap: 15px; text-align: left;">
+            <div>
+                <label style="font-size: 14px; font-weight: 600;">Usuario</label><br>
+                <input type="text" id="user" style="width:100%; margin-top: 5px;" placeholder="Ingrese usuario" required>
+            </div>
+            <div>
+                <label style="font-size: 14px; font-weight: 600;">Contraseña</label><br>
+                <input type="password" id="pass" style="width:100%; margin-top: 5px;" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Entrar al Sistema</button>
+            <div id="msg" style="color: var(--danger); font-size: 13px; text-align: center; margin-top: 10px;"></div>
+        </form>
+    </main>
+
+    <script>
+        document.getElementById('loginForm').onsubmit = (e) => {
+            e.preventDefault();
+            const user = document.getElementById('user').value.trim();
+            const pass = document.getElementById('pass').value;
+
+            // Definimos los usuarios permitidos y la contraseña compartida
+            const usuariosPermitidos = ["vespe0918", "matu0918"];
+            const contrasenaCompartida = "02092018";
+
+            // Verificamos si el usuario escrito está en la lista Y la contraseña coincide
+            if (usuariosPermitidos.includes(user) && pass === contrasenaCompartida) {
+                // Opcional: Guardar quién inició sesión para mostrarlo en el dashboard
+                localStorage.setItem('usuarioActivo', user);
+                window.location.href = 'dashboard.html';
+            } else {
+                document.getElementById('msg').textContent = "Usuario o contraseña incorrectos";
+                // Limpiar el campo de contraseña por seguridad
+                document.getElementById('pass').value = "";
+            }
+        };
+    </script>
+</body>
+</html>
