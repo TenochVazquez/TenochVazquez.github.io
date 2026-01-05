@@ -21,7 +21,7 @@
                 <img src="img/Logo2.jpeg" alt="Logo" style="width: 60px;">
                 <div>
                     <h1 style="margin:0">📊 Reportes de Ventas</h1>
-                    <p style="color:#888; margin:0;">Historial local de transacciones</p>
+                    <p style="color:#888; margin:0;">Historial completo de transacciones locales</p>
                 </div>
             </div>
             <div style="display:flex; gap:10px;">
@@ -42,7 +42,7 @@
                 <thead>
                     <tr>
                         <th>Fecha</th>
-                        <th>Productos</th>
+                        <th>Productos (Nombre Completo)</th>
                         <th>Método</th>
                         <th>Subtotal</th>
                         <th>IVA</th>
@@ -60,14 +60,14 @@
         let ventasActuales = [];
 
         function renderSales() {
-            ventasActuales = SalesDB.get();
+            ventasActuales = SalesDB.get(); //
             const sales = [...ventasActuales].reverse();
             const tableBody = document.querySelector('#salesTable tbody');
             
             let sumSub = 0, sumIva = 0, sumTot = 0;
 
             if (sales.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center">No hay ventas</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center">No hay registros</td></tr>';
                 return;
             }
 
@@ -75,11 +75,14 @@
                 sumSub += s.subtotal || 0;
                 sumIva += s.iva || 0;
                 sumTot += s.total || 0;
-                const items = s.items.map(i => `${i.qty} ${i.name.split(' - ')[1] || i.name}`).join(' | ');
+                
+                // Muestra nombre completo en la tabla HTML
+                const itemsStr = s.items.map(i => `${i.qty} x ${i.name}`).join(', ');
+                
                 return `
                     <tr>
                         <td style="font-size: 11px; color:#888;">${s.date}</td>
-                        <td>${items}</td>
+                        <td>${itemsStr}</td>
                         <td><span class="badge-pago ${s.metodo === 'Efectivo' ? 'efectivo' : 'tarjeta'}">${s.metodo}</span></td>
                         <td>$${(s.subtotal || 0).toFixed(2)}</td>
                         <td>$${(s.iva || 0).toFixed(2)}</td>
@@ -94,21 +97,23 @@
         }
 
         window.exportarExcel = () => {
-            if(ventasActuales.length === 0) return alert("No hay datos");
+            if(ventasActuales.length === 0) return alert("Sin datos");
             
-            // \uFEFF es para que Excel entienda los acentos y símbolos
-            let csv = "\uFEFFFecha,Productos,Metodo,Subtotal,IVA,Total\n";
+            // \uFEFF asegura que Excel abra el archivo con acentos y símbolos correctos
+            let csv = "\uFEFFFecha,Productos Completos,Metodo,Subtotal,IVA,Total\n";
             
             ventasActuales.forEach(s => {
-                const items = s.items.map(i => `${i.qty} ${i.name.split(' - ')[1] || i.name}`).join(' - ');
-                // Usamos comas para separar columnas y comillas para textos largos
-                csv += `"${s.date}","${items}","${s.metodo}",${(s.subtotal || 0).toFixed(2)},${(s.iva || 0).toFixed(2)},${(s.total || 0).toFixed(2)}\n`;
+                // Captura el nombre completo sin recortes
+                const itemsFull = s.items.map(i => `${i.qty} x ${i.name}`).join(' | ');
+                
+                // Formateo de columnas usando comas y comillas para textos largos
+                csv += `"${s.date}","${itemsFull}","${s.metodo}",${(s.subtotal || 0).toFixed(2)},${(s.iva || 0).toFixed(2)},${(s.total || 0).toFixed(2)}\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `Reporte_Cafeeleria_${new Date().toLocaleDateString()}.csv`;
+            link.download = `Reporte_Final_Cafeeleria.csv`;
             link.click();
         };
 
