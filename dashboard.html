@@ -59,19 +59,8 @@
     <script src="js/app.js"></script>
     <script>
         function abrirCorteCaja() {
-            // Calculamos el total del día rápidamente desde el historial (SalesDB en app.js)
-            const ventas = SalesDB.get();
-            const totalDia = ventas.reduce((s, v) => s + v.total, 0);
-            
-            if (confirm(`--- RESUMEN DE TURNO ---\nVentas totales: $${totalDia.toFixed(2)}\n\n¿Desea realizar el corte y CERRAR SESIÓN?`)) {
-                // Aquí podrías agregar lógica para limpiar el historial diario si lo deseas
-                alert("Corte realizado con éxito. Cerrando sesión...");
-                
-                // Limpiamos el usuario activo y regresamos al login (index.html)
-                localStorage.removeItem('usuarioActivo');
-                window.location.href = 'index.html';
-            }
-        }
+    window.location.href = 'corte.html';
+}
     </script>
 </body>
 </html>
