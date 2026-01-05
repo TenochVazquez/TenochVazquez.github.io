@@ -4,50 +4,55 @@
     <meta charset="utf-8">
     <title>Inventario - La Cafeeleria</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .btn-add-stock { background: #2b7a5d; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; }
+        .btn-add-stock:hover { background: #1b5e20; }
+        .input-inline { width: 60px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; margin-right: 5px; }
+    </style>
 </head>
 <body style="padding: 40px; background-color: #f4f1ee;">
-    <div style="max-width: 900px; margin: auto;">
+    <div style="max-width: 1000px; margin: auto;">
         <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <div style="display: flex; align-items: center; gap: 10px;">
-                <img src="img/Logo2.jpeg" alt="Logo" style="width: 50px;">
+                <img src="img/logo.png" alt="Logo" style="width: 50px;">
                 <h1>Control de Inventario</h1>
             </div>
             <a href="dashboard.html" class="btn btn-secondary">Volver al Panel</a>
         </header>
 
         <section class="card" style="margin-bottom: 20px; padding: 25px;">
-            <h3 style="margin-top:0">Añadir Nueva Bebida o Sabor</h3>
+            <h3 style="margin-top:0">Añadir Nuevo Tipo o Sabor</h3>
             <form id="formAdd" style="display: grid; grid-template-columns: 1.5fr 1.5fr 1fr 1fr 1fr; gap: 10px; align-items: end;">
                 <div>
-                    <label style="font-size: 12px; font-weight: bold;">Tipo de Bebida</label>
-                    <input type="text" id="tipo" placeholder="Ej: Frapuchino" required style="width:100%">
+                    <label style="font-size: 11px; font-weight: bold;">Categoría (Ej: Frapuchino)</label>
+                    <input type="text" id="tipo" placeholder="Tipo" required style="width:100%">
                 </div>
                 <div>
-                    <label style="font-size: 12px; font-weight: bold;">Sabor / Variante</label>
-                    <input type="text" id="sabor" placeholder="Ej: Vainilla" required style="width:100%">
+                    <label style="font-size: 11px; font-weight: bold;">Sabor (Ej: Vainilla)</label>
+                    <input type="text" id="sabor" placeholder="Sabor" required style="width:100%">
                 </div>
                 <div>
-                    <label style="font-size: 12px; font-weight: bold;">Precio</label>
+                    <label style="font-size: 11px; font-weight: bold;">Precio</label>
                     <input type="number" id="p" placeholder="0.00" step="0.1" required style="width:100%">
                 </div>
                 <div>
-                    <label style="font-size: 12px; font-weight: bold;">Stock</label>
+                    <label style="font-size: 11px; font-weight: bold;">Stock Inicial</label>
                     <input type="number" id="s" placeholder="Cant." required style="width:100%">
                 </div>
-                <button type="submit" class="btn btn-primary" style="height: 45px;">Añadir</button>
+                <button type="submit" class="btn btn-primary" style="height: 45px;">Crear</button>
             </form>
-            <p style="font-size: 11px; color: #888; margin-top: 10px;">* El sistema los agrupará automáticamente en el menú desplegable del POS.</p>
         </section>
 
         <div class="card">
+            <h3 style="margin-bottom: 15px;">Existencias Actuales</h3>
             <table id="invTable" style="width: 100%;">
                 <thead>
                     <tr>
                         <th>Categoría</th>
                         <th>Sabor</th>
                         <th>Precio</th>
-                        <th>Stock</th>
-                        <th>Acción</th>
+                        <th>Stock Actual</th>
+                        <th style="width: 250px;">Surtir / Acciones</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -59,35 +64,59 @@
     <script>
         const render = () => {
             const data = InventoryDB.get();
-            document.querySelector('#invTable tbody').innerHTML = data.map(p => {
-                const nombreDividido = p.name.split('-');
-                const cat = nombreDividido[0].trim();
-                const sab = nombreDividido[1] ? nombreDividido[1].trim() : "---";
+            const tbody = document.querySelector('#invTable tbody');
+            
+            tbody.innerHTML = data.map(p => {
+                const [cat, sab = "---"] = p.name.split(' - ');
 
                 return `
                     <tr>
                         <td style="color: #6f4e37; font-weight: bold;">${cat}</td>
                         <td>${sab}</td>
                         <td>$${p.price.toFixed(2)}</td>
-                        <td style="font-weight:bold; color:${p.stock < 5 ? 'red' : 'green'}">${p.stock}</td>
-                        <td><button class="btn btn-secondary" onclick="del(${p.id})">❌</button></td>
+                        <td style="font-weight:bold; font-size: 18px; color:${p.stock < 10 ? 'red' : '#2b7a5d'}">${p.stock}</td>
+                        <td>
+                            <div style="display: flex; align-items: center;">
+                                <input type="number" id="add-${p.id}" class="input-inline" placeholder="+0">
+                                <button class="btn-add-stock" onclick="surtir(${p.id})">Surtir</button>
+                                <button class="btn btn-secondary" onclick="del(${p.id})">❌</button>
+                            </div>
+                        </td>
                     </tr>
                 `;
             }).join('');
         };
 
+        // Función para agregar más stock a un producto existente
+        window.surtir = (id) => {
+            const input = document.getElementById(`add-${id}`);
+            const cantidadExtra = parseInt(input.value);
+
+            if (isNaN(cantidadExtra) || cantidadExtra <= 0) {
+                return alert("Ingresa una cantidad válida para sumar.");
+            }
+
+            const inv = InventoryDB.get();
+            const producto = inv.find(x => x.id === id);
+
+            if (producto) {
+                producto.stock += cantidadExtra; // SUMA AL STOCK ACTUAL
+                InventoryDB.save(inv);
+                render();
+                alert(`Se agregaron ${cantidadExtra} unidades a ${producto.name}`);
+            }
+        };
+
         document.getElementById('formAdd').onsubmit = (e) => {
             e.preventDefault();
-            const tipo = document.getElementById('tipo').value.trim();
-            const sabor = document.getElementById('sabor').value.trim();
-            
-            // UNIMOS LOS DATOS AUTOMÁTICAMENTE
-            const nombreCompleto = `${tipo} - ${sabor}`;
+            const cat = document.getElementById('tipo').value.trim();
+            const sab = document.getElementById('sabor').value.trim();
+            const nombre = `${cat} - ${sab}`;
             
             const inv = InventoryDB.get();
             inv.push({
                 id: Date.now(),
-                name: nombreCompleto,
+                name: nombre,
                 price: parseFloat(document.getElementById('p').value),
                 stock: parseInt(document.getElementById('s').value)
             });
@@ -95,11 +124,10 @@
             InventoryDB.save(inv);
             e.target.reset();
             render();
-            alert("Sabor agregado correctamente");
         };
 
         window.del = (id) => {
-            if(confirm("¿Eliminar este producto?")) {
+            if(confirm("¿Eliminar este sabor del sistema?")) {
                 const filtered = InventoryDB.get().filter(x => x.id !== id);
                 InventoryDB.save(filtered);
                 render();
