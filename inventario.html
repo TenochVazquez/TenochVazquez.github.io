@@ -21,15 +21,15 @@
         </header>
 
         <section class="card" style="margin-bottom: 20px; padding: 25px;">
-            <h3 style="margin-top:0">Añadir Nuevo Tipo o Sabor</h3>
+            <h3 style="margin-top:0">Añadir Nuevo Producto</h3>
             <form id="formAdd" style="display: grid; grid-template-columns: 1.5fr 1.5fr 1fr 1fr 1fr; gap: 10px; align-items: end;">
                 <div>
-                    <label style="font-size: 11px; font-weight: bold;">Categoría (Ej: Frapuchino)</label>
-                    <input type="text" id="tipo" placeholder="Tipo" required style="width:100%">
+                    <label style="font-size: 11px; font-weight: bold;">Categoría</label>
+                    <input type="text" id="tipo" placeholder="Ej: Frappé" required style="width:100%">
                 </div>
                 <div>
-                    <label style="font-size: 11px; font-weight: bold;">Sabor (Ej: Vainilla)</label>
-                    <input type="text" id="sabor" placeholder="Sabor" required style="width:100%">
+                    <label style="font-size: 11px; font-weight: bold;">Sabor</label>
+                    <input type="text" id="sabor" placeholder="Ej: Nutella" required style="width:100%">
                 </div>
                 <div>
                     <label style="font-size: 11px; font-weight: bold;">Precio</label>
@@ -64,23 +64,25 @@
         import { InventoryDB } from './js/app.js';
 
         const render = () => {
-            const data = InventoryDB.get(); // Lee de tu llave 'cafeteria_inv'
+            const data = InventoryDB.get(); // Obtiene los datos de la llave 'cafeteria_inv'
             const tbody = document.querySelector('#invTable tbody');
             
             tbody.innerHTML = data.map(p => {
-                const [cat, sab = "---"] = p.name.split(' - ');
+                const parts = p.name.split(' - ');
+                const cat = parts[0] || "General";
+                const sab = parts[1] || p.name;
 
                 return `
                     <tr>
                         <td style="color: #6f4e37; font-weight: bold;">${cat}</td>
                         <td>${sab}</td>
-                        <td>$${p.price.toFixed(2)}</td>
-                        <td style="font-weight:bold; font-size: 18px; color:${p.stock < 10 ? 'red' : '#2b7a5d'}">${p.stock}</td>
+                        <td>$${parseFloat(p.price).toFixed(2)}</td>
+                        <td style="font-weight:bold; font-size: 18px; color:${p.stock < 5 ? 'red' : '#2b7a5d'}">${p.stock}</td>
                         <td>
                             <div style="display: flex; align-items: center;">
                                 <input type="number" id="add-${p.id}" class="input-inline" placeholder="+0">
-                                <button class="btn-add-stock" onclick="window.surtir('${p.id}')">Surtir</button>
-                                <button class="btn btn-secondary" onclick="window.del('${p.id}')">❌</button>
+                                <button class="btn-add-stock" onclick="window.surtirStock('${p.id}')">Surtir</button>
+                                <button class="btn btn-secondary" onclick="window.eliminarProducto('${p.id}')">❌</button>
                             </div>
                         </td>
                     </tr>
@@ -88,55 +90,51 @@
             }).join('');
         };
 
-        // Función para agregar más stock
-        window.surtir = (id) => {
-            const input = document.getElementById(`add-${id}`);
-            const cantidadExtra = parseInt(input.value);
-
-            if (isNaN(cantidadExtra) || cantidadExtra <= 0) {
-                return alert("Ingresa una cantidad válida para sumar.");
-            }
+        // Función global para Surtir
+        window.surtirStock = (id) => {
+            const extra = parseInt(document.getElementById(`add-${id}`).value) || 0;
+            if (extra <= 0) return alert("Ingresa una cantidad mayor a 0");
 
             const inv = InventoryDB.get();
-            const producto = inv.find(x => x.id == id);
-
-            if (producto) {
-                producto.stock += cantidadExtra; 
+            const prod = inv.find(x => x.id == id);
+            if (prod) {
+                prod.stock += extra;
                 InventoryDB.save(inv); // Guarda en localStorage
                 render();
-                alert(`Se agregaron ${cantidadExtra} unidades a ${producto.name}`);
+                alert("Stock actualizado");
             }
         };
 
-        // Crear nuevo producto
+        // Función global para Eliminar
+        window.eliminarProducto = (id) => {
+            if(confirm("¿Eliminar este producto?")) {
+                const inv = InventoryDB.get().filter(x => x.id != id);
+                InventoryDB.save(inv);
+                render();
+            }
+        };
+
+        // Evento para añadir nuevo
         document.getElementById('formAdd').onsubmit = (e) => {
             e.preventDefault();
             const cat = document.getElementById('tipo').value.trim();
             const sab = document.getElementById('sabor').value.trim();
-            const nombre = `${cat} - ${sab}`;
-            
+            const precio = parseFloat(document.getElementById('p').value);
+            const stock = parseInt(document.getElementById('s').value);
+
             const inv = InventoryDB.get();
             inv.push({
-                id: Date.now().toString(),
-                name: nombre,
-                price: parseFloat(document.getElementById('p').value),
-                stock: parseInt(document.getElementById('s').value)
+                id: Date.now(), // Genera ID único
+                name: `${cat} - ${sab}`,
+                price: precio,
+                stock: stock
             });
-            
+
             InventoryDB.save(inv);
             e.target.reset();
             render();
         };
 
-        // Eliminar producto
-        window.del = (id) => {
-            if(confirm("¿Eliminar este sabor del sistema?")) {
-                const filtered = InventoryDB.get().filter(x => x.id != id);
-                InventoryDB.save(filtered);
-                render();
-            }
-        };
-        
         render();
     </script>
 </body>
