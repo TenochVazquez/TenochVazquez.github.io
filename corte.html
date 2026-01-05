@@ -6,62 +6,74 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         .corte-container { max-width: 600px; margin: 40px auto; }
-        .monto-principal { font-size: 48px; color: var(--success); font-weight: 800; margin: 10px 0; }
+        .monto-principal { font-size: 48px; color: #2b7a5d; font-weight: 800; margin: 10px 0; }
         .detalle-fila { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #ddd; }
-        .resaltado { font-weight: bold; color: var(--accent-dark); }
+        .resaltado { font-weight: bold; color: #4a3728; }
         .input-arqueo { 
             width: 100%; padding: 15px; font-size: 24px; text-align: center; 
-            border: 2px solid var(--accent); border-radius: 10px; margin: 10px 0;
+            border: 2px solid #efe3d5; border-radius: 10px; margin: 10px 0;
         }
         .resultado-box { padding: 15px; border-radius: 10px; margin-top: 15px; font-weight: bold; display: none; }
+        
+        @media print {
+            .btn, a, .input-arqueo, p { display: none; }
+            .card { border: none; box-shadow: none; }
+            .corte-container { margin: 0; width: 100%; }
+        }
     </style>
 </head>
-<body style="padding: 20px;">
+<body style="padding: 20px; background-color: #f4f1ee;">
     <div class="corte-container">
         <header style="text-align: center; margin-bottom: 30px;">
             <img src="img/Logo2.jpeg" alt="Logo" style="width: 100px; margin-bottom: 10px;">
             <h1>Cierre de Turno</h1>
-            <p id="fechaCorte" style="color: var(--muted)"></p>
+            <p id="fechaCorte" style="color: #888;"></p>
         </header>
 
-        <main class="card" style="padding: 30px; text-align: center;">
-            <p style="text-transform: uppercase; font-size: 14px; letter-spacing: 1px; margin: 0;">Dinero esperado en EFECTIVO</p>
+        <main class="card" style="padding: 30px; text-align: center; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <p style="text-transform: uppercase; font-size: 14px; letter-spacing: 1px; margin: 0; color: #888;">Efectivo Esperado en Caja</p>
             <h2 class="monto-principal" id="efectivoEsperado">$0.00</h2>
             
             <div style="background: #fdf6ec; padding: 20px; border-radius: 15px; margin: 20px 0; border: 1px solid #f5dab1;">
-                <p style="margin: 0; font-weight: bold;">¿Cuánto dinero hay en caja físicamente?</p>
-                <input type="number" id="contadoFisico" class="input-arqueo" placeholder="$ 0.00" oninput="calcularDiferencia()">
+                <p style="margin: 0; font-weight: bold; color: #4a3728;">Contabilización Física de Efectivo:</p>
+                <input type="number" id="contadoFisico" class="input-arqueo" placeholder="$ 0.00" oninput="window.calcularDiferencia()">
                 <div id="resultadoArqueo" class="resultado-box"></div>
             </div>
 
-            <div style="text-align: left; margin-top: 20px;">
-                <div class="detalle-fila"><span>Ventas Efectivo:</span><span id="ventasEfectivo">$0.00</span></div>
-                <div class="detalle-fila"><span>Ventas Tarjeta (IVA inc.):</span><span id="ventasTarjeta">$0.00</span></div>
-                <div class="detalle-fila resaltado"><span>TOTAL VENTAS DEL DÍA:</span><span id="totalVentas">$0.00</span></div>
+            <div style="text-align: left; margin-top: 20px; border-top: 2px solid #f4f1ee; padding-top: 20px;">
+                <div class="detalle-fila"><span>Total Ventas Efectivo:</span><span id="ventasEfectivo">$0.00</span></div>
+                <div class="detalle-fila"><span>Total Ventas Tarjeta:</span><span id="ventasTarjeta">$0.00</span></div>
+                <div class="detalle-fila resaltado" style="font-size: 1.2em; margin-top: 10px;">
+                    <span>TOTAL DEL DÍA:</span><span id="totalVentas">$0.00</span>
+                </div>
             </div>
 
             <div style="display: grid; gap: 10px; margin-top: 30px;">
                 <button onclick="window.print()" class="btn btn-secondary">Imprimir Reporte</button>
-                <button onclick="finalizarTurno()" class="btn btn-primary" style="background: var(--danger)">Cerrar Turno y Salir</button>
-                <a href="dashboard.html" style="text-decoration: none; color: var(--muted); font-size: 13px; margin-top: 10px;">Regresar al Panel</a>
+                <button onclick="window.finalizarTurno()" class="btn btn-primary" style="background: #a13b2a; border: none; height: 50px;">Finalizar Jornada</button>
+                <a href="dashboard.html" style="text-decoration: none; color: #888; font-size: 13px; margin-top: 10px;">Regresar al Panel</a>
             </div>
         </main>
     </div>
 
-    <script src="js/app.js"></script>
-    <script>
+    <script type="module">
+        import { SalesDB } from './js/app.js';
+
         let montoEsperadoEfectivo = 0;
 
-        document.getElementById('fechaCorte').textContent = new Date().toLocaleString();
-
-        function calcularCorte() {
+        function iniciarCorte() {
+            document.getElementById('fechaCorte').textContent = new Date().toLocaleString();
+            
             const ventas = SalesDB.get();
             let efectivo = 0, tarjeta = 0, total = 0;
 
             ventas.forEach(v => {
-                total += v.total;
-                if (v.metodo === 'Efectivo') efectivo += v.total;
-                else tarjeta += v.total;
+                total += v.total || 0;
+                if (v.metodo === 'Efectivo') {
+                    efectivo += v.total || 0;
+                } else {
+                    tarjeta += v.total || 0;
+                }
             });
 
             montoEsperadoEfectivo = efectivo;
@@ -71,7 +83,7 @@
             document.getElementById('totalVentas').textContent = `$${total.toFixed(2)}`;
         }
 
-        function calcularDiferencia() {
+        window.calcularDiferencia = () => {
             const contado = parseFloat(document.getElementById('contadoFisico').value) || 0;
             const diferencia = contado - montoEsperadoEfectivo;
             const resBox = document.getElementById('resultadoArqueo');
@@ -91,16 +103,17 @@
                 resBox.style.background = "#fef0f0";
                 resBox.style.color = "#f56c6c";
             }
-        }
+        };
 
-        function finalizarTurno() {
-            if (confirm("¿Confirmas el cierre de caja? Se cerrará la sesión.")) {
-                localStorage.removeItem('usuarioActivo');
+        window.finalizarTurno = () => {
+            if (confirm("¿Confirmas el cierre de caja? Se cerrará la sesión actual.")) {
+                // Opcional: Aquí podrías limpiar las ventas si deseas empezar de cero cada día
+                // localStorage.setItem('cafeteria_sales', JSON.stringify([]));
                 window.location.href = 'index.html';
             }
-        }
+        };
 
-        calcularCorte();
+        iniciarCorte();
     </script>
 </body>
 </html>
