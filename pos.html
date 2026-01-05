@@ -14,6 +14,12 @@
         .category-group.active .options-list { display: block; }
         .flavor-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f9f9f9; cursor: pointer; transition: 0.2s; }
         .flavor-item:hover { background: #fdfaf8; padding-left: 20px; }
+        
+        /* Estilos para botones de cantidad */
+        .qty-btn { background: #efe3d5; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin: 0 5px; }
+        .qty-btn:hover { background: #dcc8b1; }
+        .del-btn { color: #a13b2a; border: none; background: none; cursor: pointer; font-weight: bold; font-size: 16px; }
+
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { width: 400px; padding: 30px; border-radius: 15px; background: white; }
         @media print { body * { visibility: hidden; } #ticketPrint, #ticketPrint * { visibility: visible; } #ticketPrint { position: absolute; left: 0; top: 0; width: 100%; display: block !important; } }
@@ -32,13 +38,16 @@
         <section class="card" style="padding: 20px;"><h3>Menú</h3><div id="menuDesplegable"></div></section>
         <aside class="card" style="padding: 20px;">
             <h3>Cuenta</h3>
-            <table id="cartTable" style="width:100%"><thead><tr><th>Producto</th><th>Cant</th><th>Total</th><th></th></tr></thead><tbody></tbody></table>
+            <table id="cartTable" style="width:100%">
+                <thead><tr><th>Producto</th><th style="text-align:center">Cant</th><th>Total</th><th></th></tr></thead>
+                <tbody></tbody>
+            </table>
             <div style="margin-top:20px; border-top:2px solid #eee; padding-top:10px;">
                 <div style="display:flex; justify-content:space-between"><span>Subtotal:</span><span id="subtotalText">$0.00</span></div>
                 <div style="display:flex; justify-content:space-between"><span id="ivaLabel">IVA (0%):</span><span id="ivaText">$0.00</span></div>
-                <div style="display:flex; justify-content:space-between; font-size:22px; font-weight:bold;"><span>TOTAL:</span><span id="totalText">$0.00</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:22px; font-weight:bold; color: #4a3728;"><span>TOTAL:</span><span id="totalText">$0.00</span></div>
             </div>
-            <button onclick="window.abrirModalPago()" class="btn btn-primary" style="width:100%; margin-top:20px; height:50px">PAGAR</button>
+            <button onclick="window.abrirModalPago()" class="btn btn-primary" style="width:100%; margin-top:20px; height:55px; font-size: 18px;">PAGAR</button>
         </aside>
     </div>
 
@@ -78,15 +87,42 @@
             const p = inventario.find(x => x.id == id);
             if(!p || p.stock <= 0) return alert("Sin existencias");
             const inCart = cart.find(x => x.id == id);
-            if (inCart) inCart.qty++; else cart.push({ ...p, qty: 1 });
+            if (inCart) {
+                if(inCart.qty < p.stock) inCart.qty++;
+                else alert("Límite de stock alcanzado");
+            } else {
+                cart.push({ ...p, qty: 1 });
+            }
             window.actualizarCalculos();
+        };
+
+        window.changeQty = (id, delta) => {
+            const item = cart.find(x => x.id == id);
+            const p = inventario.find(x => x.id == id);
+            if (item) {
+                if (delta > 0 && item.qty >= p.stock) return alert("No hay más stock disponible");
+                item.qty += delta;
+                if (item.qty <= 0) return window.removeFromCart(id);
+                window.actualizarCalculos();
+            }
         };
 
         window.actualizarCalculos = () => {
             const sub = cart.reduce((s, i) => s + (i.qty * i.price), 0), iva = aplicarIVA ? sub * 0.08 : 0, tot = sub + iva;
-            document.querySelector('#cartTable tbody').innerHTML = cart.map(i => `<tr><td>${i.name}</td><td style="text-align:center">${i.qty}</td><td>$${(i.qty*i.price).toFixed(2)}</td><td><button onclick="window.removeFromCart('${i.id}')">✕</button></td></tr>`).join('');
+            document.querySelector('#cartTable tbody').innerHTML = cart.map(i => `
+                <tr>
+                    <td>${i.name}</td>
+                    <td style="text-align:center">
+                        <button class="qty-btn" onclick="window.changeQty('${i.id}', -1)">-</button>
+                        ${i.qty}
+                        <button class="qty-btn" onclick="window.changeQty('${i.id}', 1)">+</button>
+                    </td>
+                    <td>$${(i.qty*i.price).toFixed(2)}</td>
+                    <td><button class="del-btn" onclick="window.removeFromCart('${i.id}')">✕</button></td>
+                </tr>`).join('');
             document.getElementById('subtotalText').textContent = `$${sub.toFixed(2)}`;
             document.getElementById('ivaText').textContent = `$${iva.toFixed(2)}`;
+            document.getElementById('ivaLabel').textContent = `IVA (${aplicarIVA ? '8%' : '0%'}):`;
             document.getElementById('totalText').textContent = `$${tot.toFixed(2)}`;
             document.getElementById('montoRecibido').value = tot.toFixed(2);
         };
@@ -95,17 +131,26 @@
             const sub = cart.reduce((s, i) => s + (i.qty * i.price), 0), iva = aplicarIVA ? sub * 0.08 : 0, tot = sub + iva;
             const rec = parseFloat(document.getElementById('montoRecibido').value), cam = rec - tot;
             if (cam < 0 && !aplicarIVA) return alert("Monto insuficiente");
+            
             SalesDB.save({ metodo: aplicarIVA?'Tarjeta':'Efectivo', items: [...cart], subtotal: sub, iva, total: tot });
             cart.forEach(i => InventoryDB.updateStock(i.id, i.stock - i.qty));
-            document.getElementById('modalMainContent').innerHTML = `<div style="text-align:center"><h2>VENTA EXITOSA</h2><h1>CAMBIO: $${cam.toFixed(2)}</h1><button onclick="window.imprimirTicket(${sub},${iva},${tot},${rec},${cam})" class="btn btn-primary">IMPRIMIR TICKET</button></div>`;
+            
+            document.getElementById('modalMainContent').innerHTML = `
+                <div style="text-align:center">
+                    <h2 style="color:#2b7a5d">VENTA EXITOSA</h2>
+                    <div style="background:#f0f9f4; padding:20px; border-radius:10px; margin:15px 0">
+                        <p>CAMBIO:</p><h1 style="font-size:48px; color:#1b5e20">$${cam.toFixed(2)}</h1>
+                    </div>
+                    <button onclick="window.imprimirTicket(${sub},${iva},${tot},${rec},${cam})" class="btn btn-primary" style="width:100%">IMPRIMIR TICKET</button>
+                </div>`;
         };
 
         window.imprimirTicket = (sub, iva, tot, rec, cam) => {
-            const items = cart.map(i => `<div style="display:flex; justify-content:space-between"><span>${i.qty} x ${i.name.split(' - ')[1] || i.name}</span><span>$${(i.qty*i.price).toFixed(2)}</span></div>`).join('');
+            const items = cart.map(i => `<div style="display:flex; justify-content:space-between"><span>${i.qty} x ${i.name}</span><span>$${(i.qty*i.price).toFixed(2)}</span></div>`).join('');
             document.getElementById('ticketPrint').innerHTML = `
                 <div style="width:280px; margin:auto; padding:20px; background:#fff; font-family:'Courier New',monospace; border:1px solid #eee; text-align:center;">
                     <img src="img/Logo2.jpeg" style="width:60px;"><br><strong>LA CAFEELERIA</strong><hr>${items}<hr>
-                    <div style="text-align:right">SUBTOTAL: $${sub.toFixed(2)}<br>TOTAL: $${tot.toFixed(2)}<br>PAGO: $${rec.toFixed(2)}<br>CAMBIO: $${cam.toFixed(2)}</div>
+                    <div style="text-align:right">SUBTOTAL: $${sub.toFixed(2)}<br>IVA: $${iva.toFixed(2)}<br>TOTAL: $${tot.toFixed(2)}<br>PAGO: $${rec.toFixed(2)}<br>CAMBIO: $${cam.toFixed(2)}</div>
                 </div>`;
             window.print(); window.location.reload();
         };
@@ -114,6 +159,7 @@
         window.actualizarIVA = (s) => { aplicarIVA = s; document.getElementById('seccionEfectivo').style.display = s?'none':'block'; window.actualizarCalculos(); };
         window.abrirModalPago = () => { if(cart.length) document.getElementById('modalPago').style.display='flex'; };
         window.cerrarModal = () => document.getElementById('modalPago').style.display='none';
+        
         renderMenu();
     </script>
 </body>
