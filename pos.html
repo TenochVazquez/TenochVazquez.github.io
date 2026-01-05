@@ -5,21 +5,18 @@
     <title>Caja - La Cafeeleria</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .pos-container { display: grid; grid-template-columns: 1fr 400px; gap: 20px; }
-        .grid-prods { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-        .prod-card { text-align: center; border: 1px solid #eee; cursor: pointer; padding: 15px; }
+        .pos-container { display: grid; grid-template-columns: 1fr 420px; gap: 20px; }
+        .grid-prods { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; max-height: 70vh; overflow-y: auto; }
+        .prod-card { text-align: center; border: 1px solid #eee; cursor: pointer; padding: 15px; background: white; border-radius: 10px; }
         .prod-card:hover { border-color: var(--accent); background: var(--bg-panel); transform: translateY(-2px); transition: 0.2s; }
         
-        /* Botones de edición en la tabla */
-        .qty-btn { padding: 2px 8px; margin: 0 2px; border-radius: 4px; border: 1px solid #ddd; background: #f8f8f8; cursor: pointer; }
-        .qty-btn:hover { background: var(--accent-light); }
-        .del-btn { color: #a13b2a; border: none; background: none; cursor: pointer; font-weight: bold; }
+        .qty-btn { padding: 2px 8px; margin: 0 5px; border-radius: 4px; border: 1px solid #ddd; background: #f8f8f8; cursor: pointer; font-weight: bold; }
+        .del-btn { color: #a13b2a; border: none; background: none; cursor: pointer; font-weight: bold; font-size: 18px; }
 
-        .modal-overlay { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5); 
-            display: none; align-items: center; justify-content: center; z-index: 1000; 
-        }
-        .modal-content { width: 400px; padding: 30px; border-radius: 15px; background: white; }
+        .search-bar { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 15px; font-size: 16px; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { width: 400px; padding: 30px; border-radius: 15px; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 
         @media print {
             body * { visibility: hidden; }
@@ -28,13 +25,13 @@
         }
     </style>
 </head>
-<body style="padding: 20px;">
+<body style="padding: 20px; background-color: #f4f1ee;">
 
     <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="img/Logo2.jpeg" alt="Logo" style="width: 50px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <img src="img/Logo2.jpeg" alt="Logo" style="width: 60px;">
             <div>
-                <h1 style="margin:0">La Cafeeleria</h1>
+                <h1 style="margin:0; color: #4a3728;">La Cafeeleria</h1>
                 <p id="dateText" style="margin:0; color:var(--muted); font-size:12px"></p>
             </div>
         </div>
@@ -42,51 +39,53 @@
     </header>
 
     <div class="pos-container">
-        <section class="card">
-            <h3>Menú</h3>
+        <section class="card" style="padding: 20px;">
+            <input type="text" id="busquedaProd" class="search-bar" placeholder="🔍 Buscar bebida o sabor (Vainilla, Mocha, Fresa...)" oninput="filtrarProductos()">
             <div id="prodGrid" class="grid-prods"></div>
         </section>
 
-        <aside class="card">
-            <h3>Cuenta</h3>
-            <table id="cartTable">
-                <thead>
-                    <tr>
-                        <th>Prod.</th>
-                        <th>Cant.</th>
-                        <th>Total</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+        <aside class="card" style="padding: 20px;">
+            <h3 style="margin-top:0">Cuenta Actual</h3>
+            <div style="height: 300px; overflow-y: auto; border-bottom: 1px solid #eee;">
+                <table id="cartTable" style="width: 100%;">
+                    <thead>
+                        <tr style="text-align: left; font-size: 14px; color: #888;">
+                            <th>Producto</th>
+                            <th style="text-align: center;">Cant.</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
             
-            <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px; font-size: 14px;">
-                <div style="display:flex; justify-content: space-between;"><span>Subtotal:</span><span id="subtotalText">$0.00</span></div>
-                <div style="display:flex; justify-content: space-between;"><span id="ivaLabel">IVA (0%):</span><span id="ivaText">$0.00</span></div>
-                <div style="display:flex; justify-content: space-between; font-size: 18px; font-weight: bold; margin-top: 5px; color: var(--accent-dark);">
+            <div style="margin-top: 20px; font-size: 15px;">
+                <div style="display:flex; justify-content: space-between; margin-bottom: 5px;"><span>Subtotal:</span><span id="subtotalText">$0.00</span></div>
+                <div style="display:flex; justify-content: space-between; margin-bottom: 5px;"><span id="ivaLabel">IVA (0%):</span><span id="ivaText">$0.00</span></div>
+                <div style="display:flex; justify-content: space-between; font-size: 22px; font-weight: bold; margin-top: 10px; color: #4a3728; border-top: 2px solid #eee; padding-top: 10px;">
                     <span>TOTAL:</span><span id="totalText">$0.00</span>
                 </div>
             </div>
 
-            <button onclick="abrirModalPago()" class="btn btn-primary" style="width: 100%; margin-top: 20px; height: 50px; font-size: 18px;">PAGAR</button>
+            <button onclick="abrirModalPago()" class="btn btn-primary" style="width: 100%; margin-top: 20px; height: 60px; font-size: 20px; font-weight: bold;">PAGAR</button>
         </aside>
     </div>
 
     <div id="modalPago" class="modal-overlay">
         <div class="card modal-content" id="modalMainContent">
-            <h3 style="margin-top:0">Finalizar Venta</h3>
-            <div style="margin-bottom: 15px;">
-                <label><input type="radio" name="metodo" value="Efectivo" checked onchange="actualizarIVA(false)"> 💵 Efectivo</label>
-                <label style="margin-left:15px"><input type="radio" name="metodo" value="Tarjeta" onchange="actualizarIVA(true)"> 💳 Tarjeta</label>
+            <h3 style="margin-top:0; text-align: center;">Finalizar Venta</h3>
+            <div style="display: flex; justify-content: space-around; margin: 20px 0;">
+                <label style="cursor:pointer; font-weight: bold;"><input type="radio" name="metodo" value="Efectivo" checked onchange="actualizarIVA(false)"> 💵 Efectivo</label>
+                <label style="cursor:pointer; font-weight: bold;"><input type="radio" name="metodo" value="Tarjeta" onchange="actualizarIVA(true)"> 💳 Tarjeta</label>
             </div>
 
-            <div id="seccionEfectivo" style="margin-top: 15px; background: #f9f9f9; padding: 10px; border-radius: 8px;">
-                <label style="font-size: 12px;">Monto Recibido:</label>
-                <input type="number" id="montoRecibido" style="width:100%; font-size: 20px;" step="0.01">
+            <div id="seccionEfectivo" style="margin-top: 15px; background: #fdfaf8; padding: 15px; border-radius: 10px; border: 1px solid #eee;">
+                <label style="font-size: 12px; color: #888;">Monto Recibido del Cliente:</label>
+                <input type="number" id="montoRecibido" style="width:100%; font-size: 28px; text-align: center; border:none; background:transparent; font-weight:bold;" step="0.01">
             </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <div style="display: flex; gap: 15px; margin-top: 25px;">
                 <button onclick="cerrarModal()" class="btn btn-secondary" style="flex:1">Atrás</button>
                 <button onclick="confirmarVenta()" class="btn btn-primary" style="flex:1">Confirmar</button>
             </div>
@@ -104,24 +103,31 @@
 
         document.getElementById('dateText').textContent = new Date().toLocaleDateString();
 
-        function renderProds() {
+        function renderProds(lista = inventarioActual) {
             const grid = document.getElementById('prodGrid');
-            grid.innerHTML = inventarioActual.map(p => `
+            grid.innerHTML = lista.map(p => `
                 <div class="card prod-card" onclick="addToCart(${p.id})">
+                    <div style="font-size: 24px;">☕</div>
                     <strong>${p.name}</strong><br>
-                    <span style="color:var(--accent-dark); font-weight:bold">$${p.price.toFixed(2)}</span><br>
-                    <small>Stock: ${p.stock}</small>
+                    <span style="color:#6f4e37; font-weight:bold">$${p.price.toFixed(2)}</span><br>
+                    <small style="color:${p.stock < 5 ? 'red' : '#888'}">Stock: ${p.stock}</small>
                 </div>
             `).join('');
         }
 
+        function filtrarProductos() {
+            const term = document.getElementById('busquedaProd').value.toLowerCase();
+            const filtrados = inventarioActual.filter(p => p.name.toLowerCase().includes(term));
+            renderProds(filtrados);
+        }
+
         window.addToCart = (id) => {
             const p = inventarioActual.find(x => x.id === id);
-            if(p.stock <= 0) return alert("Sin stock");
+            if(p.stock <= 0) return alert("Sin existencias");
             const inCart = cart.find(x => x.id === id);
             if (inCart) {
                 if(inCart.qty < p.stock) inCart.qty++;
-                else alert("Máximo stock disponible alcanzado");
+                else alert("Máximo disponible alcanzado");
             } else {
                 cart.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
             }
@@ -132,7 +138,7 @@
             const item = cart.find(x => x.id === id);
             const p = inventarioActual.find(x => x.id === id);
             if (item) {
-                if (delta > 0 && item.qty >= p.stock) return alert("Sin más stock");
+                if (delta > 0 && item.qty >= p.stock) return alert("Stock agotado");
                 item.qty += delta;
                 if (item.qty <= 0) removeFromCart(id);
                 else actualizarCalculos();
@@ -153,15 +159,15 @@
         function actualizarCalculos() {
             const body = document.querySelector('#cartTable tbody');
             body.innerHTML = cart.map(i => `
-                <tr>
-                    <td>${i.name}</td>
-                    <td>
+                <tr style="border-bottom: 1px solid #f9f9f9;">
+                    <td style="padding: 10px 0; font-size: 14px;">${i.name}</td>
+                    <td style="text-align: center;">
                         <button class="qty-btn" onclick="changeQty(${i.id}, -1)">-</button>
                         ${i.qty}
                         <button class="qty-btn" onclick="changeQty(${i.id}, 1)">+</button>
                     </td>
-                    <td>$${(i.qty * i.price).toFixed(2)}</td>
-                    <td><button class="del-btn" onclick="removeFromCart(${i.id})">✕</button></td>
+                    <td style="font-weight: bold;">$${(i.qty * i.price).toFixed(2)}</td>
+                    <td style="text-align: right;"><button class="del-btn" onclick="removeFromCart(${i.id})">✕</button></td>
                 </tr>
             `).join('');
             
@@ -176,7 +182,11 @@
             document.getElementById('montoRecibido').value = total.toFixed(2);
         }
 
-        window.abrirModalPago = () => cart.length > 0 ? document.getElementById('modalPago').style.display='flex' : alert("Cuenta vacía");
+        window.abrirModalPago = () => {
+            if(cart.length === 0) return alert("Selecciona productos primero");
+            document.getElementById('modalPago').style.display='flex';
+        };
+
         window.cerrarModal = () => document.getElementById('modalPago').style.display='none';
 
         window.confirmarVenta = () => {
@@ -201,35 +211,36 @@
             const modalMain = document.getElementById('modalMainContent');
             modalMain.innerHTML = `
                 <div style="text-align:center">
-                    <h2 style="color:#2b7a5d">VENTA EXITOSA</h2>
-                    <div style="background:#f0f9f4; padding:20px; border-radius:10px; margin:15px 0; border: 1px solid #2b7a5d">
-                        <p style="margin:0; font-size:14px; color:#2b7a5d">CAMBIO A DEVOLVER:</p>
-                        <h1 style="margin:5px 0; font-size:48px; color:#1b5e20">$${cambio.toFixed(2)}</h1>
+                    <h2 style="color:#2b7a5d">¡VENTA EXITOSA!</h2>
+                    <div style="background:#f0f9f4; padding:25px; border-radius:10px; margin:20px 0; border: 1px solid #2b7a5d">
+                        <p style="margin:0; font-size:14px; color:#2b7a5d; font-weight:bold">CAMBIO A DEVOLVER:</p>
+                        <h1 style="margin:10px 0; font-size:54px; color:#1b5e20">$${cambio.toFixed(2)}</h1>
                     </div>
-                    <button onclick="generarTicket(${subtotal}, ${iva}, ${total}, '${metodo}', ${montoRec}, ${cambio})" class="btn btn-primary" style="width:100%">Imprimir Ticket</button>
+                    <button onclick="generarTicket(${subtotal}, ${iva}, ${total}, '${metodo}', ${montoRec}, ${cambio})" class="btn btn-primary" style="width:100%; height:50px;">IMPRIMIR TICKET</button>
                 </div>
             `;
         };
 
         function generarTicket(sub, iva, tot, met, rec, cam) {
             const ticket = document.getElementById('ticketPrint');
-            const itemsHtml = cart.map(i => `<div style="display:flex;justify-content:space-between"><span>${i.qty} x ${i.name}</span><span>$${(i.qty*i.price).toFixed(2)}</span></div>`).join('');
+            const itemsHtml = cart.map(i => `<div style="display:flex;justify-content:space-between; font-size:12px"><span>${i.qty} x ${i.name}</span><span>$${(i.qty*i.price).toFixed(2)}</span></div>`).join('');
 
             ticket.innerHTML = `
-                <div style="text-align:center; font-family:monospace; width:280px; margin:auto; border:1px solid #000; padding:10px">
-                    <img src="img/logo2.jpeg" style="width:60px; filter:grayscale(100%)">
-                    <h3>LA CAFEELERIA</h3>
-                    <p style="font-size:10px">${new Date().toLocaleString()}</p>
-                    <hr>
+                <div style="text-align:center; font-family:monospace; width:280px; margin:auto; border:1px solid #000; padding:15px; background:white;">
+                    <img src="img/logo.png" style="width:70px; filter:grayscale(100%)">
+                    <h2 style="margin:10px 0">LA CAFEELERIA</h2>
+                    <p style="font-size:11px">${new Date().toLocaleString()}</p>
+                    <hr style="border:none; border-top:1px dashed #000">
                     ${itemsHtml}
-                    <hr>
-                    <div style="text-align:right">
-                        <p>Subtotal: $${sub.toFixed(2)}</p>
-                        ${iva > 0 ? `<p>IVA (8%): $${iva.toFixed(2)}</p>` : ''}
-                        <p><strong>TOTAL: $${tot.toFixed(2)}</strong></p>
-                        <p>Pago: ${met}</p>
-                        ${met === 'Efectivo' ? `<p>Cambio: $${cam.toFixed(2)}</p>` : ''}
+                    <hr style="border:none; border-top:1px dashed #000">
+                    <div style="text-align:right; font-size:13px">
+                        <p style="margin:2px 0">Subtotal: $${sub.toFixed(2)}</p>
+                        ${iva > 0 ? `<p style="margin:2px 0">IVA (8%): $${iva.toFixed(2)}</p>` : ''}
+                        <p style="margin:5px 0; font-size:16px"><strong>TOTAL: $${tot.toFixed(2)}</strong></p>
+                        <p style="margin:2px 0">Metodo: ${met}</p>
+                        ${met === 'Efectivo' ? `<p style="margin:2px 0">Pagó con: $${rec.toFixed(2)}</p><p style="margin:2px 0"><strong>Cambio: $${cam.toFixed(2)}</strong></p>` : ''}
                     </div>
+                    <p style="margin-top:20px; font-size:11px">¡Gracias por tu preferencia!</p>
                 </div>
             `;
             
