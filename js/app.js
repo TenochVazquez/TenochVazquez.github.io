@@ -1,30 +1,39 @@
-const InventoryDB = {
+// Gestión de Inventario Local con tus productos originales
+export const InventoryDB = {
     key: 'cafeteria_inv',
     get() {
         const data = localStorage.getItem(this.key);
         return data ? JSON.parse(data) : [
-            {id: 1, name: "Café Americano", price: 30.00, stock: 20},
-            {id: 2, name: "Capuchino", price: 38.00, stock: 15},
-            {id: 3, name: "Té Chai", price: 28.00, stock: 12},
-            {id: 4, name: "Pan Dulce", price: 14.00, stock: 30}
+            {id: 1, name: "Bebida Caliente - Café Americano", price: 45.00, stock: 20},
+            {id: 2, name: "Bebida Caliente - Capuchino", price: 55.00, stock: 15},
+            {id: 3, name: "Frappé - Nutella", price: 60.00, stock: 12},
+            {id: 4, name: "Postres - Pay de Queso", price: 50.00, stock: 30}
         ];
     },
     save(data) {
         localStorage.setItem(this.key, JSON.stringify(data));
+    },
+    updateStock(id, newStock) {
+        const inv = this.get();
+        const index = inv.findIndex(p => p.id == id);
+        if (index !== -1) {
+            inv[index].stock = newStock;
+            this.save(inv);
+        }
     }
 };
 
+// Reloj en tiempo real
 function updateClock() {
     const elTime = document.getElementById('time');
-    const elDate = document.getElementById('date');
+    const elDate = document.getElementById('dateText');
     if (elTime) elTime.textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
     if (elDate) elDate.textContent = new Date().toLocaleDateString();
 }
-if (document.getElementById('time')) {
-    updateClock();
-    setInterval(updateClock, 1000);
-}
-const SalesDB = {
+setInterval(updateClock, 1000);
+
+// Gestión de Ventas Local
+export const SalesDB = {
     key: 'cafeteria_sales',
     get() {
         const data = localStorage.getItem(this.key);
@@ -35,7 +44,7 @@ const SalesDB = {
         history.push({
             id: Date.now(),
             date: new Date().toLocaleString(),
-            ...sale // Aquí se incluirán subtotal, iva y total
+            ...sale 
         });
         localStorage.setItem(this.key, JSON.stringify(history));
     }

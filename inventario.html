@@ -60,10 +60,11 @@
         </div>
     </div>
 
-    <script src="js/app.js"></script>
-    <script>
+    <script type="module">
+        import { InventoryDB } from './js/app.js';
+
         const render = () => {
-            const data = InventoryDB.get();
+            const data = InventoryDB.get(); // Lee de tu llave 'cafeteria_inv'
             const tbody = document.querySelector('#invTable tbody');
             
             tbody.innerHTML = data.map(p => {
@@ -78,8 +79,8 @@
                         <td>
                             <div style="display: flex; align-items: center;">
                                 <input type="number" id="add-${p.id}" class="input-inline" placeholder="+0">
-                                <button class="btn-add-stock" onclick="surtir(${p.id})">Surtir</button>
-                                <button class="btn btn-secondary" onclick="del(${p.id})">❌</button>
+                                <button class="btn-add-stock" onclick="window.surtir('${p.id}')">Surtir</button>
+                                <button class="btn btn-secondary" onclick="window.del('${p.id}')">❌</button>
                             </div>
                         </td>
                     </tr>
@@ -87,7 +88,7 @@
             }).join('');
         };
 
-        // Función para agregar más stock a un producto existente
+        // Función para agregar más stock
         window.surtir = (id) => {
             const input = document.getElementById(`add-${id}`);
             const cantidadExtra = parseInt(input.value);
@@ -97,16 +98,17 @@
             }
 
             const inv = InventoryDB.get();
-            const producto = inv.find(x => x.id === id);
+            const producto = inv.find(x => x.id == id);
 
             if (producto) {
-                producto.stock += cantidadExtra; // SUMA AL STOCK ACTUAL
-                InventoryDB.save(inv);
+                producto.stock += cantidadExtra; 
+                InventoryDB.save(inv); // Guarda en localStorage
                 render();
                 alert(`Se agregaron ${cantidadExtra} unidades a ${producto.name}`);
             }
         };
 
+        // Crear nuevo producto
         document.getElementById('formAdd').onsubmit = (e) => {
             e.preventDefault();
             const cat = document.getElementById('tipo').value.trim();
@@ -115,7 +117,7 @@
             
             const inv = InventoryDB.get();
             inv.push({
-                id: Date.now(),
+                id: Date.now().toString(),
                 name: nombre,
                 price: parseFloat(document.getElementById('p').value),
                 stock: parseInt(document.getElementById('s').value)
@@ -126,9 +128,10 @@
             render();
         };
 
+        // Eliminar producto
         window.del = (id) => {
             if(confirm("¿Eliminar este sabor del sistema?")) {
-                const filtered = InventoryDB.get().filter(x => x.id !== id);
+                const filtered = InventoryDB.get().filter(x => x.id != id);
                 InventoryDB.save(filtered);
                 render();
             }

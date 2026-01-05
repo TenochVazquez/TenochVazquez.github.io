@@ -73,11 +73,9 @@
     <script type="module">
         import { SalesDB } from './js/app.js';
 
-        let ventasActuales = [];
-
-        async function renderSales() {
-            ventasActuales = await SalesDB.get();
-            // Ordenar por fecha más reciente (usando el timestamp de Firebase)
+        // Eliminamos el 'async' y el 'await' para que sea instantáneo desde localStorage
+        function renderSales() {
+            const ventasActuales = SalesDB.get(); //
             const sales = [...ventasActuales].reverse();
             
             const tableBody = document.querySelector('#salesTable tbody');
@@ -113,7 +111,6 @@
                 `;
             }).join('');
 
-            // Actualizar Contadores
             document.getElementById('totalSubtotal').textContent = `$${sumSubtotal.toFixed(2)}`;
             document.getElementById('totalIVA').textContent = `$${sumIVA.toFixed(2)}`;
             document.getElementById('totalBruto').textContent = `$${sumTotal.toFixed(2)}`;
@@ -121,6 +118,7 @@
         }
 
         window.exportarCSV = () => {
+            const ventasActuales = SalesDB.get();
             if(ventasActuales.length === 0) return alert("No hay datos para exportar");
             
             let csv = "Fecha,Productos,Metodo,Subtotal,IVA,Total\n";
@@ -132,15 +130,11 @@
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.setAttribute('hidden', '');
             a.setAttribute('href', url);
             a.setAttribute('download', 'reporte_ventas_cafeeleria.csv');
-            document.body.appendChild(a);
             a.click();
-            document.body.removeChild(a);
         };
 
-        // Ejecutar carga inicial
         renderSales();
     </script>
 </body>
