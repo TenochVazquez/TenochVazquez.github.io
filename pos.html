@@ -5,6 +5,7 @@
     <title>Caja - La Cafeeleria</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
+        /* MANTENEMOS TU LÓGICA DE DISEÑO POS */
         .pos-container { display: grid; grid-template-columns: 1fr 420px; gap: 20px; }
         .category-group { margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background: white; }
         .category-header { background: #f8f1e9; padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #4a3728; }
@@ -15,39 +16,31 @@
         .flavor-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f9f9f9; cursor: pointer; transition: 0.2s; }
         .flavor-item:hover { background: #fdfaf8; padding-left: 20px; }
         
-        /* DISEÑO DE BOTONES +/- PROFESIONAL */
-        .qty-wrapper {
-            display: flex;
-            align-items: center;
-            background: #3d2b1f; 
-            border-radius: 6px;
-            padding: 2px;
-            width: 90px;
-            justify-content: space-between;
-            margin: 0 auto;
-        }
-        .qty-btn {
-            background: #5d4037;
-            color: #eecda3;
-            border: none;
-            width: 25px;
-            height: 25px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            line-height: 1;
-        }
-        .qty-btn:hover { background: #8d6e63; }
+        /* BOTONES +/- PROFESIONALES */
+        .qty-wrapper { display: flex; align-items: center; background: #3d2b1f; border-radius: 6px; padding: 2px; width: 90px; justify-content: space-between; margin: 0 auto; }
+        .qty-btn { background: #5d4037; color: #eecda3; border: none; width: 25px; height: 25px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; line-height: 1; }
         .qty-val { color: white; font-weight: bold; font-size: 14px; }
         .del-btn { color: #a13b2a; font-size: 18px; background: none; border: none; cursor: pointer; font-weight: bold; }
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { width: 400px; padding: 30px; border-radius: 15px; background: white; }
-        @media print { body * { visibility: hidden; } #ticketPrint, #ticketPrint * { visibility: visible; } #ticketPrint { position: absolute; left: 0; top: 0; width: 100%; display: block !important; } }
+
+        /* --- ESTILO DE IMPRESIÓN IGUAL AL CORTE --- */
+        @media print {
+            body * { visibility: hidden; }
+            #ticketPrint, #ticketPrint * { visibility: visible; }
+            #ticketPrint { 
+                position: absolute; left: 0; top: 0; width: 100%; 
+                display: block !important; 
+                background: white;
+                padding: 0;
+            }
+            .detalle-fila { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #ddd; font-size: 18px; }
+            .monto-principal { font-size: 48px; color: #2b7a5d; font-weight: 800; margin: 10px 0; text-align: center; }
+        }
     </style>
 </head>
-<body style="padding: 20px; background-color: #f4f1ee;">
+<body style="padding: 20px; background-color: #f4f1ee; font-family: Inter, sans-serif;">
     <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div style="display: flex; align-items: center; gap: 15px;">
             <img src="img/Logo2.jpeg" alt="Logo" style="width: 60px;">
@@ -61,15 +54,15 @@
         <aside class="card" style="padding: 20px;">
             <h3>Cuenta</h3>
             <table id="cartTable" style="width:100%">
-                <thead><tr><th>Producto</th><th style="text-align:center">Cant</th><th>Total</th><th></th></tr></thead>
+                <thead><tr><th style="text-align:left">Producto</th><th style="text-align:center">Cant</th><th style="text-align:right">Total</th><th></th></tr></thead>
                 <tbody></tbody>
             </table>
             <div style="margin-top:20px; border-top:2px solid #eee; padding-top:10px;">
                 <div style="display:flex; justify-content:space-between"><span>Subtotal:</span><span id="subtotalText">$0.00</span></div>
                 <div style="display:flex; justify-content:space-between"><span id="ivaLabel">IVA (0%):</span><span id="ivaText">$0.00</span></div>
-                <div style="display:flex; justify-content:space-between; font-size:22px; font-weight:bold;"><span>TOTAL:</span><span id="totalText">$0.00</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:24px; font-weight:bold; color:#4a3728; margin-top:10px;"><span>TOTAL:</span><span id="totalText">$0.00</span></div>
             </div>
-            <button onclick="window.abrirModalPago()" class="btn btn-primary" style="width:100%; margin-top:20px; height:50px">PAGAR</button>
+            <button onclick="window.abrirModalPago()" class="btn btn-primary" style="width:100%; margin-top:20px; height:50px; background:#a13b2a; border:none; color:white; font-weight:bold; border-radius:10px; cursor:pointer;">PAGAR</button>
         </aside>
     </div>
 
@@ -80,11 +73,13 @@
                 <label><input type="radio" name="metodo" value="Efectivo" checked onchange="window.actualizarIVA(false)"> Efectivo</label>
                 <label><input type="radio" name="metodo" value="Tarjeta" onchange="window.actualizarIVA(true)"> Tarjeta (8%)</label>
             </div>
-            <div id="seccionEfectivo" style="background:#f9f9f9; padding:15px; border-radius:10px"><label>Recibido:</label><input type="number" id="montoRecibido" style="width:100%; font-size:24px; text-align:center"></div>
-            <div style="display:flex; gap:10px; margin-top:20px"><button onclick="window.cerrarModal()" class="btn btn-secondary" style="flex:1">Atrás</button><button onclick="window.confirmarVenta()" class="btn btn-primary" style="flex:1">Confirmar</button></div>
+            <div id="seccionEfectivo" style="background:#f9f9f9; padding:15px; border-radius:10px"><label>Recibido:</label><input type="number" id="montoRecibido" style="width:100%; font-size:24px; text-align:center; border:2px solid #efe3d5; border-radius:8px;"></div>
+            <div style="display:flex; gap:10px; margin-top:20px"><button onclick="window.cerrarModal()" class="btn btn-secondary" style="flex:1">Atrás</button><button onclick="window.confirmarVenta()" class="btn btn-primary" style="flex:1; background:#2b7a5d; color:white; border:none; border-radius:8px;">Confirmar</button></div>
         </div>
     </div>
-    <div id="ticketPrint" style="display:none"></div>
+
+    <div id="ticketPrint" style="display:none; font-family: sans-serif; max-width: 400px; margin: auto;">
+        </div>
 
     <script type="module">
         import { InventoryDB, SalesDB } from './js/app.js';
@@ -132,14 +127,8 @@
             document.querySelector('#cartTable tbody').innerHTML = cart.map(i => `
                 <tr>
                     <td style="text-align:left">${i.name}</td>
-                    <td>
-                        <div class="qty-wrapper">
-                            <button class="qty-btn" onclick="window.changeQty('${i.id}', -1)">-</button>
-                            <span class="qty-val">${i.qty}</span>
-                            <button class="qty-btn" onclick="window.changeQty('${i.id}', 1)">+</button>
-                        </div>
-                    </td>
-                    <td>$${(i.qty*i.price).toFixed(2)}</td>
+                    <td><div class="qty-wrapper"><button class="qty-btn" onclick="window.changeQty('${i.id}', -1)">-</button><span class="qty-val">${i.qty}</span><button class="qty-btn" onclick="window.changeQty('${i.id}', 1)">+</button></div></td>
+                    <td style="text-align:right">$${(i.qty*i.price).toFixed(2)}</td>
                     <td><button class="del-btn" onclick="window.removeFromCart('${i.id}')">✕</button></td>
                 </tr>`).join('');
             document.getElementById('subtotalText').textContent = `$${sub.toFixed(2)}`;
@@ -152,25 +141,60 @@
             const sub = cart.reduce((s, i) => s + (i.qty * i.price), 0), iva = aplicarIVA ? sub * 0.08 : 0, tot = sub + iva;
             const rec = parseFloat(document.getElementById('montoRecibido').value), cam = rec - tot;
             if (cam < 0 && !aplicarIVA) return alert("Monto insuficiente");
+            
             SalesDB.save({ metodo: aplicarIVA?'Tarjeta':'Efectivo', items: [...cart], subtotal: sub, iva, total: tot });
             cart.forEach(i => InventoryDB.updateStock(i.id, i.stock - i.qty));
-            document.getElementById('modalMainContent').innerHTML = `<div style="text-align:center"><h2>VENTA EXITOSA</h2><h1>CAMBIO: $${cam.toFixed(2)}</h1><button onclick="window.imprimirTicket(${sub},${iva},${tot},${rec},${cam})" class="btn btn-primary">TICKET</button></div>`;
+            
+            document.getElementById('modalMainContent').innerHTML = `
+                <div style="text-align:center">
+                    <p style="text-transform:uppercase; color:#888; font-size:14px;">Cambio para el cliente</p>
+                    <h1 style="font-size:48px; color:#2b7a5d; margin:10px 0;">$${cam.toFixed(2)}</h1>
+                    <button onclick="window.imprimirTicket(${sub},${iva},${tot},${rec},${cam})" class="btn btn-primary" style="width:100%; height:50px; background:#a13b2a; border:none; color:white; font-weight:bold; border-radius:10px; cursor:pointer;">IMPRIMIR TICKET</button>
+                </div>`;
         };
 
         window.imprimirTicket = (sub, iva, tot, rec, cam) => {
-            const items = cart.map(i => `<div style="display:flex; justify-content:space-between"><span>${i.qty} x ${i.name}</span><span>$${(i.qty*i.price).toFixed(2)}</span></div>`).join('');
+            const rows = cart.map(i => `
+                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #ddd;">
+                    <span>${i.qty}x ${i.name}</span>
+                    <span style="font-weight:bold;">$${(i.qty*i.price).toFixed(2)}</span>
+                </div>`).join('');
+
             document.getElementById('ticketPrint').innerHTML = `
-                <div style="width:280px; margin:auto; padding:20px; background:#fff; font-family:'Courier New',monospace; border:1px solid #eee; text-align:center;">
-                    <img src="img/Logo2.jpeg" style="width:60px;"><br><strong>LA CAFEELERIA</strong><hr>${items}<hr>
-                    <div style="text-align:right">TOTAL: $${tot.toFixed(2)}<br>PAGO: $${rec.toFixed(2)}<br>CAMBIO: $${cam.toFixed(2)}</div>
+                <div style="text-align: center; padding: 20px;">
+                    <img src="img/Logo2.jpeg" style="width: 100px; margin-bottom: 10px;">
+                    <h1 style="margin:0; font-size:24px;">La Cafeeleria</h1>
+                    <p style="color:#888; font-size:14px;">${new Date().toLocaleString()}</p>
+                    <hr style="border:none; border-top: 2px solid #f4f1ee; margin: 20px 0;">
+                    <p style="text-transform: uppercase; font-size: 14px; color: #888; margin:0;">Total Pagado</p>
+                    <div style="font-size: 48px; color: #2b7a5d; font-weight: 800; margin: 10px 0;">$${tot.toFixed(2)}</div>
+                    <div style="text-align: left; margin-top: 20px;">
+                        ${rows}
+                        <div style="display: flex; justify-content: space-between; padding: 10px 0; font-weight:bold; font-size:1.2em;">
+                            <span>PAGO (${aplicarIVA?'TARJETA':'EFECTIVO'}):</span>
+                            <span>$${rec.toFixed(2)}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px 0; color:#888;">
+                            <span>CAMBIO:</span>
+                            <span>$${cam.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <p style="margin-top:30px; font-size:12px; color:#888;">¡Gracias por su preferencia!</p>
                 </div>`;
-            window.print(); window.location.reload();
+            
+            window.print(); 
+            window.location.reload();
         };
 
         window.removeFromCart = (id) => { cart = cart.filter(x => x.id != id); window.actualizarCalculos(); };
         window.actualizarIVA = (s) => { aplicarIVA = s; document.getElementById('seccionEfectivo').style.display = s?'none':'block'; window.actualizarCalculos(); };
         window.abrirModalPago = () => { if(cart.length) document.getElementById('modalPago').style.display='flex'; };
         window.cerrarModal = () => document.getElementById('modalPago').style.display='none';
+        
+        // Reloj y fecha
+        document.getElementById('dateText').textContent = new Date().toLocaleDateString();
+        setInterval(() => { document.getElementById('time').textContent = new Date().toLocaleTimeString(); }, 1000);
+
         renderMenu();
     </script>
 </body>
