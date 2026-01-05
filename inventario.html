@@ -4,137 +4,45 @@
     <meta charset="utf-8">
     <title>Inventario - La Cafeeleria</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        .btn-add-stock { background: #2b7a5d; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; }
-        .btn-add-stock:hover { background: #1b5e20; }
-        .input-inline { width: 60px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; margin-right: 5px; }
-    </style>
 </head>
 <body style="padding: 40px; background-color: #f4f1ee;">
     <div style="max-width: 1000px; margin: auto;">
         <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <img src="img/Logo2.jpeg" alt="Logo" style="width: 50px;">
-                <h1>Control de Inventario</h1>
-            </div>
+            <div style="display: flex; align-items: center; gap: 10px;"><img src="img/Logo2.jpeg" style="width: 50px;"><h1>Control de Inventario</h1></div>
             <a href="dashboard.html" class="btn btn-secondary">Volver al Panel</a>
         </header>
-
-        <section class="card" style="margin-bottom: 20px; padding: 25px;">
-            <h3 style="margin-top:0">Añadir Nuevo Producto</h3>
-            <form id="formAdd" style="display: grid; grid-template-columns: 1.5fr 1.5fr 1fr 1fr 1fr; gap: 10px; align-items: end;">
-                <div>
-                    <label style="font-size: 11px; font-weight: bold;">Categoría</label>
-                    <input type="text" id="tipo" placeholder="Ej: Frappé" required style="width:100%">
-                </div>
-                <div>
-                    <label style="font-size: 11px; font-weight: bold;">Sabor</label>
-                    <input type="text" id="sabor" placeholder="Ej: Nutella" required style="width:100%">
-                </div>
-                <div>
-                    <label style="font-size: 11px; font-weight: bold;">Precio</label>
-                    <input type="number" id="p" placeholder="0.00" step="0.1" required style="width:100%">
-                </div>
-                <div>
-                    <label style="font-size: 11px; font-weight: bold;">Stock Inicial</label>
-                    <input type="number" id="s" placeholder="Cant." required style="width:100%">
-                </div>
-                <button type="submit" class="btn btn-primary" style="height: 45px;">Crear</button>
+        <section class="card" style="padding: 25px;">
+            <h3>Añadir Producto</h3>
+            <form id="formAdd" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 10px; align-items: end;">
+                <div><label>Categoría</label><input type="text" id="tipo" required style="width:100%"></div>
+                <div><label>Sabor</label><input type="text" id="sabor" required style="width:100%"></div>
+                <div><label>Precio</label><input type="number" id="p" step="0.1" required style="width:100%"></div>
+                <div><label>Stock</label><input type="number" id="s" required style="width:100%"></div>
+                <button type="submit" class="btn btn-primary">Crear</button>
             </form>
         </section>
-
-        <div class="card">
-            <h3 style="margin-bottom: 15px;">Existencias Actuales</h3>
-            <table id="invTable" style="width: 100%;">
-                <thead>
-                    <tr>
-                        <th>Categoría</th>
-                        <th>Sabor</th>
-                        <th>Precio</th>
-                        <th>Stock Actual</th>
-                        <th style="width: 250px;">Surtir / Acciones</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+        <div class="card" style="margin-top:20px;"><table id="invTable" style="width: 100%;">
+            <thead><tr><th>Categoría</th><th>Sabor</th><th>Precio</th><th>Stock</th><th>Acción</th></tr></thead>
+            <tbody></tbody></table></div>
     </div>
-
     <script type="module">
         import { InventoryDB } from './js/app.js';
-
         const render = () => {
-            const data = InventoryDB.get(); // Obtiene los datos de la llave 'cafeteria_inv'
-            const tbody = document.querySelector('#invTable tbody');
-            
-            tbody.innerHTML = data.map(p => {
-                const parts = p.name.split(' - ');
-                const cat = parts[0] || "General";
-                const sab = parts[1] || p.name;
-
-                return `
-                    <tr>
-                        <td style="color: #6f4e37; font-weight: bold;">${cat}</td>
-                        <td>${sab}</td>
-                        <td>$${parseFloat(p.price).toFixed(2)}</td>
-                        <td style="font-weight:bold; font-size: 18px; color:${p.stock < 5 ? 'red' : '#2b7a5d'}">${p.stock}</td>
-                        <td>
-                            <div style="display: flex; align-items: center;">
-                                <input type="number" id="add-${p.id}" class="input-inline" placeholder="+0">
-                                <button class="btn-add-stock" onclick="window.surtirStock('${p.id}')">Surtir</button>
-                                <button class="btn btn-secondary" onclick="window.eliminarProducto('${p.id}')">❌</button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+            const data = InventoryDB.get();
+            document.querySelector('#invTable tbody').innerHTML = data.map(p => {
+                const [cat, sab = "---"] = p.name.split(' - ');
+                return `<tr><td>${cat}</td><td>${sab}</td><td>$${p.price.toFixed(2)}</td>
+                <td style="font-weight:bold; color:${p.stock<5?'red':'green'}">${p.stock}</td>
+                <td><button onclick="window.del('${p.id}')">❌</button></td></tr>`;
             }).join('');
         };
-
-        // Función global para Surtir
-        window.surtirStock = (id) => {
-            const extra = parseInt(document.getElementById(`add-${id}`).value) || 0;
-            if (extra <= 0) return alert("Ingresa una cantidad mayor a 0");
-
-            const inv = InventoryDB.get();
-            const prod = inv.find(x => x.id == id);
-            if (prod) {
-                prod.stock += extra;
-                InventoryDB.save(inv); // Guarda en localStorage
-                render();
-                alert("Stock actualizado");
-            }
-        };
-
-        // Función global para Eliminar
-        window.eliminarProducto = (id) => {
-            if(confirm("¿Eliminar este producto?")) {
-                const inv = InventoryDB.get().filter(x => x.id != id);
-                InventoryDB.save(inv);
-                render();
-            }
-        };
-
-        // Evento para añadir nuevo
         document.getElementById('formAdd').onsubmit = (e) => {
             e.preventDefault();
-            const cat = document.getElementById('tipo').value.trim();
-            const sab = document.getElementById('sabor').value.trim();
-            const precio = parseFloat(document.getElementById('p').value);
-            const stock = parseInt(document.getElementById('s').value);
-
             const inv = InventoryDB.get();
-            inv.push({
-                id: Date.now(), // Genera ID único
-                name: `${cat} - ${sab}`,
-                price: precio,
-                stock: stock
-            });
-
-            InventoryDB.save(inv);
-            e.target.reset();
-            render();
+            inv.push({ id: Date.now().toString(), name: `${document.getElementById('tipo').value} - ${document.getElementById('sabor').value}`, price: parseFloat(document.getElementById('p').value), stock: parseInt(document.getElementById('s').value) });
+            InventoryDB.save(inv); e.target.reset(); render();
         };
-
+        window.del = (id) => { if(confirm("¿Eliminar?")) { InventoryDB.save(InventoryDB.get().filter(x => x.id != id)); render(); } };
         render();
     </script>
 </body>

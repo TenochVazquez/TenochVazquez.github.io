@@ -6,42 +6,22 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         .pos-container { display: grid; grid-template-columns: 1fr 420px; gap: 20px; }
-        
-        /* Estilos del Menú Acordeón */
         .category-group { margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background: white; }
-        .category-header { 
-            background: #f8f1e9; padding: 15px; cursor: pointer; display: flex; 
-            justify-content: space-between; align-items: center; font-weight: bold; color: #4a3728;
-        }
-        .category-header:hover { background: #efe3d5; }
-        .category-header::after { content: '▼'; font-size: 12px; transition: 0.3s; }
+        .category-header { background: #f8f1e9; padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #4a3728; }
         .category-group.active .category-header::after { transform: rotate(180deg); }
-        
+        .category-header::after { content: '▼'; font-size: 12px; transition: 0.3s; }
         .options-list { display: none; padding: 10px; border-top: 1px solid #eee; background: #fff; }
         .category-group.active .options-list { display: block; }
-
-        .flavor-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px; border-bottom: 1px solid #f9f9f9; cursor: pointer; transition: 0.2s;
-        }
+        .flavor-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f9f9f9; cursor: pointer; transition: 0.2s; }
         .flavor-item:hover { background: #fdfaf8; padding-left: 20px; color: var(--accent-dark); }
-        .flavor-item:last-child { border: none; }
-
         .qty-btn { padding: 2px 8px; margin: 0 5px; border-radius: 4px; border: 1px solid #ddd; background: #f8f8f8; cursor: pointer; }
         .del-btn { color: #a13b2a; border: none; background: none; cursor: pointer; font-weight: bold; }
-
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { width: 400px; padding: 30px; border-radius: 15px; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-
-        @media print {
-            body * { visibility: hidden; }
-            #ticketPrint, #ticketPrint * { visibility: visible; }
-            #ticketPrint { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
-        }
+        @media print { body * { visibility: hidden; } #ticketPrint, #ticketPrint * { visibility: visible; } #ticketPrint { position: absolute; left: 0; top: 0; width: 100%; display: block !important; } }
     </style>
 </head>
 <body style="padding: 20px; background-color: #f4f1ee;">
-
     <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div style="display: flex; align-items: center; gap: 15px;">
             <img src="img/Logo2.jpeg" alt="Logo" style="width: 60px;">
@@ -59,17 +39,9 @@
         <aside class="card" style="padding: 20px;">
             <h3>Cuenta Actual</h3>
             <table id="cartTable" style="width: 100%;">
-                <thead>
-                    <tr style="text-align: left; font-size: 14px; color: #888;">
-                        <th>Producto</th>
-                        <th style="text-align: center;">Cant.</th>
-                        <th>Total</th>
-                        <th></th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Producto</th><th style="text-align: center;">Cant.</th><th>Total</th><th></th></tr></thead>
                 <tbody></tbody>
             </table>
-            
             <div style="margin-top: 20px; border-top: 2px solid #eee; padding-top: 10px;">
                 <div style="display:flex; justify-content: space-between;"><span>Subtotal:</span><span id="subtotalText">$0.00</span></div>
                 <div style="display:flex; justify-content: space-between;"><span id="ivaLabel">IVA (0%):</span><span id="ivaText">$0.00</span></div>
@@ -77,41 +49,34 @@
                     <span>TOTAL:</span><span id="totalText">$0.00</span>
                 </div>
             </div>
-            <button onclick="abrirModalPago()" class="btn btn-primary" style="width: 100%; margin-top: 20px; height: 55px; font-size: 18px;">PAGAR</button>
+            <button onclick="window.abrirModalPago()" class="btn btn-primary" style="width: 100%; margin-top: 20px; height: 55px; font-size: 18px;">PAGAR</button>
         </aside>
     </div>
 
     <div id="modalPago" class="modal-overlay">
         <div class="card modal-content" id="modalMainContent">
-            <h3 style="margin-top:0; text-align: center;">Finalizar Venta</h3>
+            <h3 style="text-align: center;">Finalizar Venta</h3>
             <div style="display: flex; justify-content: space-around; margin: 20px 0;">
-                <label style="cursor:pointer;"><input type="radio" name="metodo" value="Efectivo" checked onchange="actualizarIVA(false)"> 💵 Efectivo</label>
-                <label style="cursor:pointer;"><input type="radio" name="metodo" value="Tarjeta" onchange="actualizarIVA(true)"> 💳 Tarjeta</label>
+                <label><input type="radio" name="metodo" value="Efectivo" checked onchange="window.actualizarIVA(false)"> Efectivo</label>
+                <label><input type="radio" name="metodo" value="Tarjeta" onchange="window.actualizarIVA(true)"> Tarjeta</label>
             </div>
-
             <div id="seccionEfectivo" style="margin-top: 15px; background: #fdfaf8; padding: 15px; border-radius: 10px; border: 1px solid #eee;">
-                <label style="font-size: 12px; color: #888;">Monto Recibido:</label>
-                <input type="number" id="montoRecibido" style="width:100%; font-size: 28px; text-align: center; border:none; background:transparent; font-weight:bold;" step="0.01">
+                <label style="font-size: 12px;">Monto Recibido:</label>
+                <input type="number" id="montoRecibido" style="width:100%; font-size: 28px; text-align: center; border:none; background:transparent; font-weight:bold;">
             </div>
-
             <div style="display: flex; gap: 15px; margin-top: 25px;">
-                <button onclick="cerrarModal()" class="btn btn-secondary" style="flex:1">Atrás</button>
-                <button onclick="confirmarVenta()" class="btn btn-primary" style="flex:1">Confirmar</button>
+                <button onclick="window.cerrarModal()" class="btn btn-secondary" style="flex:1">Atrás</button>
+                <button onclick="window.confirmarVenta()" class="btn btn-primary" style="flex:1">Confirmar</button>
             </div>
         </div>
     </div>
-
     <div id="ticketPrint" style="display:none;"></div>
 
     <script type="module">
         import { InventoryDB, SalesDB } from './js/app.js';
+        let cart = [], aplicarIVA = false, inventario = [];
 
-        let cart = [];
-        let aplicarIVA = false;
-        const IVA_RATE = 0.08;
-        let inventario = [];
-
-        function iniciar() {
+        async function init() {
             inventario = InventoryDB.get();
             document.getElementById('dateText').textContent = new Date().toLocaleDateString();
             renderMenu();
@@ -120,121 +85,77 @@
         function renderMenu() {
             const menuCont = document.getElementById('menuDesplegable');
             const grupos = {};
-            
             inventario.forEach(p => {
-                const [categoria, sabor = "Clásico"] = p.name.split(' - ');
-                if (!grupos[categoria]) grupos[categoria] = [];
-                grupos[categoria].push({ ...p, sabor });
+                const [cat, sab = "Clásico"] = p.name.split(' - ');
+                if (!grupos[cat]) grupos[cat] = [];
+                grupos[cat].push({ ...p, sabor: sab });
             });
-
             menuCont.innerHTML = Object.keys(grupos).map(cat => `
-                <div class="category-group" id="group-${cat.replace(/\s/g, '')}">
-                    <div class="category-header" onclick="toggleGroup('group-${cat.replace(/\s/g, '')}')">
-                        ${cat}
-                    </div>
-                    <div class="options-list">
-                        ${grupos[cat].map(item => `
-                            <div class="flavor-item" onclick="window.addToCart('${item.id}')">
-                                <span>${item.sabor}</span>
-                                <span style="font-weight:bold">$${item.price.toFixed(2)}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
+                <div class="category-group" id="g-${cat.replace(/\s/g, '')}">
+                    <div class="category-header" onclick="document.getElementById('g-${cat.replace(/\s/g, '')}').classList.toggle('active')">${cat}</div>
+                    <div class="options-list">${grupos[cat].map(i => `
+                        <div class="flavor-item" onclick="window.addToCart('${i.id}')">
+                            <span>${i.sabor}</span><strong>$${i.price.toFixed(2)}</strong>
+                        </div>`).join('')}</div>
+                </div>`).join('');
         }
-
-        window.toggleGroup = (id) => document.getElementById(id).classList.toggle('active');
 
         window.addToCart = (id) => {
             const p = inventario.find(x => x.id == id);
             if(!p || p.stock <= 0) return alert("Sin existencias");
-            const inCart = cart.find(x => x.id == id);
-            if (inCart) inCart.qty++;
-            else cart.push({ ...p, qty: 1 });
-            actualizarCalculos();
+            const item = cart.find(x => x.id == id);
+            if (item) item.qty++; else cart.push({ ...p, qty: 1 });
+            window.actualizarCalculos();
         };
 
         window.actualizarCalculos = () => {
-            const body = document.querySelector('#cartTable tbody');
-            body.innerHTML = cart.map(i => `
-                <tr>
-                    <td>${i.name}</td>
-                    <td style="text-align: center;">
-                        <button class="qty-btn" onclick="window.changeQty('${i.id}', -1)">-</button>
-                        ${i.qty}
-                        <button class="qty-btn" onclick="window.changeQty('${i.id}', 1)">+</button>
-                    </td>
-                    <td style="font-weight: bold;">$${(i.qty * i.price).toFixed(2)}</td>
-                    <td><button class="del-btn" onclick="window.removeFromCart('${i.id}')">✕</button></td>
-                </tr>
-            `).join('');
-            
-            const subtotal = cart.reduce((s, i) => s + (i.qty * i.price), 0);
-            const iva = aplicarIVA ? (subtotal * IVA_RATE) : 0;
-            const total = subtotal + iva;
-
-            document.getElementById('subtotalText').textContent = `$${subtotal.toFixed(2)}`;
-            document.getElementById('ivaLabel').textContent = `IVA (${aplicarIVA ? '8%' : '0%'}):`;
+            const sub = cart.reduce((s, i) => s + (i.qty * i.price), 0);
+            const iva = aplicarIVA ? sub * 0.08 : 0;
+            const tot = sub + iva;
+            document.querySelector('#cartTable tbody').innerHTML = cart.map(i => `
+                <tr><td>${i.name}</td><td style="text-align:center">
+                <button class="qty-btn" onclick="window.changeQty('${i.id}',-1)">-</button>${i.qty}
+                <button class="qty-btn" onclick="window.changeQty('${i.id}',1)">+</button></td>
+                <td>$${(i.qty*i.price).toFixed(2)}</td><td><button class="del-btn" onclick="window.rem('${i.id}')">✕</button></td></tr>`).join('');
+            document.getElementById('subtotalText').textContent = `$${sub.toFixed(2)}`;
             document.getElementById('ivaText').textContent = `$${iva.toFixed(2)}`;
-            document.getElementById('totalText').textContent = `$${total.toFixed(2)}`;
-            document.getElementById('montoRecibido').value = total.toFixed(2);
+            document.getElementById('totalText').textContent = `$${tot.toFixed(2)}`;
+            document.getElementById('montoRecibido').value = tot.toFixed(2);
         };
 
-        window.changeQty = (id, delta) => {
+        window.changeQty = (id, d) => {
             const item = cart.find(x => x.id == id);
-            const p = inventario.find(x => x.id == id);
-            if (item) {
-                if (delta > 0 && item.qty >= p.stock) return alert("Stock agotado");
-                item.qty += delta;
-                if (item.qty <= 0) window.removeFromCart(id);
-                actualizarCalculos();
-            }
+            if (item) { item.qty += d; if (item.qty <= 0) window.rem(id); window.actualizarCalculos(); }
         };
-
-        window.removeFromCart = (id) => { cart = cart.filter(x => x.id != id); actualizarCalculos(); };
-        window.actualizarIVA = (s) => { 
-            aplicarIVA = s; 
-            document.getElementById('seccionEfectivo').style.display = s ? 'none' : 'block';
-            actualizarCalculos(); 
-        };
+        window.rem = (id) => { cart = cart.filter(x => x.id != id); window.actualizarCalculos(); };
+        window.actualizarIVA = (s) => { aplicarIVA = s; document.getElementById('seccionEfectivo').style.display = s?'none':'block'; window.actualizarCalculos(); };
         window.abrirModalPago = () => { if(cart.length) document.getElementById('modalPago').style.display='flex'; };
         window.cerrarModal = () => document.getElementById('modalPago').style.display='none';
 
         window.confirmarVenta = () => {
-            const subtotal = cart.reduce((s, i) => s + (i.qty * i.price), 0);
-            const iva = aplicarIVA ? (subtotal * IVA_RATE) : 0;
-            const total = subtotal + iva;
-            const rec = parseFloat(document.getElementById('montoRecibido').value);
-            const cambio = rec - total;
+            const sub = cart.reduce((s, i) => s + (i.qty * i.price), 0), iva = aplicarIVA ? sub * 0.08 : 0, tot = sub + iva;
+            const rec = parseFloat(document.getElementById('montoRecibido').value), cam = rec - tot;
+            if (cam < 0 && !aplicarIVA) return alert("Monto insuficiente");
 
-            if (cambio < 0 && !aplicarIVA) return alert("Monto insuficiente");
-
-            SalesDB.save({ metodo: aplicarIVA?'Tarjeta':'Efectivo', items: [...cart], subtotal, iva, total, recibido: rec, cambio });
-            cart.forEach(item => InventoryDB.updateStock(item.id, item.stock - item.qty));
+            SalesDB.save({ metodo: aplicarIVA?'Tarjeta':'Efectivo', items: [...cart], subtotal: sub, iva, total: tot, cambio: cam });
+            cart.forEach(i => InventoryDB.updateStock(i.id, i.stock - i.qty));
 
             document.getElementById('modalMainContent').innerHTML = `
-                <div style="text-align:center">
-                    <h2 style="color:#2b7a5d">VENTA EXITOSA</h2>
-                    <div style="background:#f0f9f4; padding:20px; border-radius:10px; margin:15px 0">
-                        <p>CAMBIO:</p><h1 style="font-size:48px; color:#1b5e20">$${cambio.toFixed(2)}</h1>
-                    </div>
-                    <button onclick="window.generarTicket(${subtotal}, ${iva}, ${total}, ${rec}, ${cambio})" class="btn btn-primary" style="width:100%">IMPRIMIR TICKET</button>
-                </div>`;
+                <div style="text-align:center"><h2>VENTA EXITOSA</h2>
+                <div style="background:#f0f9f4; padding:20px; border-radius:10px; margin:15px 0">
+                <p>CAMBIO:</p><h1 style="font-size:48px; color:#1b5e20">$${cam.toFixed(2)}</h1></div>
+                <button onclick="window.imprimir(${sub},${iva},${tot},${rec},${cam})" class="btn btn-primary" style="width:100%">IMPRIMIR TICKET</button></div>`;
         };
 
-        window.generarTicket = (sub, iva, tot, rec, cam) => {
-            const itemsHtml = cart.map(i => `<div style="display:flex;justify-content:space-between"><span>${i.qty} x ${i.name}</span><span>$${(i.qty*i.price).toFixed(2)}</span></div>`).join('');
+        window.imprimir = (sub,iva,tot,rec,cam) => {
+            const items = cart.map(i => `<div>${i.qty} x ${i.name} - $${(i.qty*i.price).toFixed(2)}</div>`).join('');
             document.getElementById('ticketPrint').innerHTML = `
-                <div style="text-align:center; font-family:monospace; width:280px; margin:auto; padding:15px; background:white; border:1px solid #000">
-                    <img src="img/Logo2.jpeg" style="width:70px;">
-                    <h3>LA CAFEELERIA</h3><hr>${itemsHtml}<hr>
-                    <div style="text-align:right">Total: $${tot.toFixed(2)}<br>Cambio: $${cam.toFixed(2)}</div>
-                </div>`;
+                <div style="text-align:center; font-family:monospace; width:280px; margin:auto; padding:15px; border:1px solid #000; background:white;">
+                <img src="img/Logo2.jpeg" style="width:70px;"><h3>LA CAFEELERIA</h3><hr>${items}<hr>
+                <div style="text-align:right">Total: $${tot.toFixed(2)}<br>Cambio: $${cam.toFixed(2)}</div></div>`;
             window.print(); window.location.reload();
         };
-
-        iniciar();
+        init();
     </script>
 </body>
 </html>
