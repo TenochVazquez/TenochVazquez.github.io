@@ -91,9 +91,6 @@
 
     <script type="module">
         import { InventoryDB } from './js/app.js';
-        
-        // El reloj se activa automáticamente porque ya está en app.js
-        // Pero podemos añadir una función extra para el Dashboard si lo deseas
         window.cerrarSesion = () => {
             if(confirm("¿Estás seguro de que quieres salir?")) {
                 window.location.href = 'index.html';
