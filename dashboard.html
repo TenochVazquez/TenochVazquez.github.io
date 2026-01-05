@@ -2,20 +2,30 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <title>Panel Principal</title>
+    <title>Panel Principal - La Cafeeleria</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding: 20px; }
-        .menu-card { cursor: pointer; text-align: center; transition: 0.3s; }
+        .menu-card { cursor: pointer; text-align: center; transition: 0.3s; position: relative; }
         .menu-card:hover { transform: translateY(-5px); border-color: var(--accent); }
         .icon { font-size: 40px; margin-bottom: 10px; }
+        
+        /* Estilo específico para la tarjeta de Corte de Caja */
+        .card-danger { border-bottom: 4px solid var(--danger); }
+        .card-danger:hover { background: #fff5f4; }
     </style>
 </head>
 <body style="padding: 20px;">
-    <header style="display: flex; justify-content: space-between; align-items: center; padding: 0 20px;">
-        <div><h1>☕ Cafetería</h1><p>Bienvenido al sistema</p></div>
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 30px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <img src="img/Logo2.jpeg" alt="Logo" style="width: 70px; height: auto;">
+            <div>
+                <h1 style="margin:0">La Cafeeleria</h1>
+                <p style="margin:0; color: var(--muted)">Sistema de Administración</p>
+            </div>
+        </div>
         <div class="card" style="padding: 10px 20px; text-align: right;">
-            <div id="time" style="font-weight: bold;">--:--</div>
+            <div id="time" style="font-weight: bold; font-size: 18px;">--:--</div>
             <div id="date" style="font-size: 12px; color: var(--muted);">--</div>
         </div>
     </header>
@@ -24,19 +34,44 @@
         <div class="card menu-card" onclick="location.href='pos.html'">
             <div class="icon">🧾</div>
             <h3>Venta Rápida</h3>
-            <p>Cobrar productos</p>
+            <p>Atención y Cobro</p>
         </div>
+
         <div class="card menu-card" onclick="location.href='inventario.html'">
             <div class="icon">📦</div>
             <h3>Inventario</h3>
-            <p>Stock y Precios</p>
+            <p>Stock y Productos</p>
         </div>
+
         <div class="card menu-card" onclick="location.href='reportes.html'">
             <div class="icon">📊</div>
             <h3>Reportes</h3>
-            <p>Ver historial</p>
+            <p>Ventas y Ganancias</p>
+        </div>
+
+        <div class="card menu-card card-danger" onclick="abrirCorteCaja()">
+            <div class="icon">💰</div>
+            <h3>Corte de Caja</h3>
+            <p>Cierre de Turno</p>
         </div>
     </div>
+
     <script src="js/app.js"></script>
+    <script>
+        function abrirCorteCaja() {
+            // Calculamos el total del día rápidamente desde el historial (SalesDB en app.js)
+            const ventas = SalesDB.get();
+            const totalDia = ventas.reduce((s, v) => s + v.total, 0);
+            
+            if (confirm(`--- RESUMEN DE TURNO ---\nVentas totales: $${totalDia.toFixed(2)}\n\n¿Desea realizar el corte y CERRAR SESIÓN?`)) {
+                // Aquí podrías agregar lógica para limpiar el historial diario si lo deseas
+                alert("Corte realizado con éxito. Cerrando sesión...");
+                
+                // Limpiamos el usuario activo y regresamos al login (index.html)
+                localStorage.removeItem('usuarioActivo');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
 </body>
 </html>
