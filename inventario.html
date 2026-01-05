@@ -2,67 +2,110 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <title>Inventario</title>
+    <title>Inventario - La Cafeeleria</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body style="padding: 40px;">
+<body style="padding: 40px; background-color: #f4f1ee;">
     <div style="max-width: 900px; margin: auto;">
         <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1>📦 Control de Inventario</h1>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="img/Logo2.jpeg" alt="Logo" style="width: 50px;">
+                <h1>Control de Inventario</h1>
+            </div>
             <a href="dashboard.html" class="btn btn-secondary">Volver al Panel</a>
         </header>
 
-        <section class="card" style="margin-bottom: 20px;">
-            <h3>Agregar Producto</h3>
-            <form id="formAdd" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px;">
-                <input type="text" id="n" placeholder="Nombre" required>
-                <input type="number" id="p" placeholder="Precio" step="0.1" required>
-                <input type="number" id="s" placeholder="Stock" required>
-                <button type="submit" class="btn btn-primary">Añadir</button>
+        <section class="card" style="margin-bottom: 20px; padding: 25px;">
+            <h3 style="margin-top:0">Añadir Nueva Bebida o Sabor</h3>
+            <form id="formAdd" style="display: grid; grid-template-columns: 1.5fr 1.5fr 1fr 1fr 1fr; gap: 10px; align-items: end;">
+                <div>
+                    <label style="font-size: 12px; font-weight: bold;">Tipo de Bebida</label>
+                    <input type="text" id="tipo" placeholder="Ej: Frapuchino" required style="width:100%">
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: bold;">Sabor / Variante</label>
+                    <input type="text" id="sabor" placeholder="Ej: Vainilla" required style="width:100%">
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: bold;">Precio</label>
+                    <input type="number" id="p" placeholder="0.00" step="0.1" required style="width:100%">
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: bold;">Stock</label>
+                    <input type="number" id="s" placeholder="Cant." required style="width:100%">
+                </div>
+                <button type="submit" class="btn btn-primary" style="height: 45px;">Añadir</button>
             </form>
+            <p style="font-size: 11px; color: #888; margin-top: 10px;">* El sistema los agrupará automáticamente en el menú desplegable del POS.</p>
         </section>
 
         <div class="card">
-            <table id="invTable">
-                <thead><tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Acciones</th></tr></thead>
+            <table id="invTable" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Categoría</th>
+                        <th>Sabor</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
                 <tbody></tbody>
             </table>
         </div>
     </div>
+
     <script src="js/app.js"></script>
     <script>
         const render = () => {
             const data = InventoryDB.get();
-            document.querySelector('#invTable tbody').innerHTML = data.map(p => `
-                <tr>
-                    <td>${p.id}</td>
-                    <td>${p.name}</td>
-                    <td>$${p.price.toFixed(2)}</td>
-                    <td style="font-weight:bold; color:${p.stock < 5 ? 'red' : 'green'}">${p.stock}</td>
-                    <td><button class="btn btn-secondary" onclick="del(${p.id})">❌</button></td>
-                </tr>
-            `).join('');
+            document.querySelector('#invTable tbody').innerHTML = data.map(p => {
+                const nombreDividido = p.name.split('-');
+                const cat = nombreDividido[0].trim();
+                const sab = nombreDividido[1] ? nombreDividido[1].trim() : "---";
+
+                return `
+                    <tr>
+                        <td style="color: #6f4e37; font-weight: bold;">${cat}</td>
+                        <td>${sab}</td>
+                        <td>$${p.price.toFixed(2)}</td>
+                        <td style="font-weight:bold; color:${p.stock < 5 ? 'red' : 'green'}">${p.stock}</td>
+                        <td><button class="btn btn-secondary" onclick="del(${p.id})">❌</button></td>
+                    </tr>
+                `;
+            }).join('');
         };
 
         document.getElementById('formAdd').onsubmit = (e) => {
             e.preventDefault();
+            const tipo = document.getElementById('tipo').value.trim();
+            const sabor = document.getElementById('sabor').value.trim();
+            
+            // UNIMOS LOS DATOS AUTOMÁTICAMENTE
+            const nombreCompleto = `${tipo} - ${sabor}`;
+            
             const inv = InventoryDB.get();
             inv.push({
-                id: Math.floor(Math.random()*1000),
-                name: document.getElementById('n').value,
+                id: Date.now(),
+                name: nombreCompleto,
                 price: parseFloat(document.getElementById('p').value),
                 stock: parseInt(document.getElementById('s').value)
             });
+            
             InventoryDB.save(inv);
             e.target.reset();
             render();
+            alert("Sabor agregado correctamente");
         };
 
         window.del = (id) => {
-            const filtered = InventoryDB.get().filter(x => x.id !== id);
-            InventoryDB.save(filtered);
-            render();
+            if(confirm("¿Eliminar este producto?")) {
+                const filtered = InventoryDB.get().filter(x => x.id !== id);
+                InventoryDB.save(filtered);
+                render();
+            }
         };
+        
         render();
     </script>
 </body>
