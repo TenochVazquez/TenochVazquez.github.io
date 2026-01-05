@@ -29,8 +29,12 @@
         .flavor-item:last-child { border: none; }
 
         /* Resto de estilos del carrito */
-        .qty-btn { padding: 2px 8px; margin: 0 5px; border-radius: 4px; border: 1px solid #ddd; cursor: pointer; }
+        .qty-btn { padding: 2px 8px; margin: 0 5px; border-radius: 4px; border: 1px solid #ddd; background: #f8f8f8; cursor: pointer; }
         .del-btn { color: #a13b2a; border: none; background: none; cursor: pointer; font-weight: bold; }
+
+        /* Estilos del Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { width: 400px; padding: 30px; border-radius: 15px; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 
         @media print {
             body * { visibility: hidden; }
@@ -72,7 +76,7 @@
             <div style="margin-top: 20px; border-top: 2px solid #eee; padding-top: 10px;">
                 <div style="display:flex; justify-content: space-between;"><span>Subtotal:</span><span id="subtotalText">$0.00</span></div>
                 <div style="display:flex; justify-content: space-between;"><span id="ivaLabel">IVA (0%):</span><span id="ivaText">$0.00</span></div>
-                <div style="display:flex; justify-content: space-between; font-size: 22px; font-weight: bold; color: #4a3728;">
+                <div style="display:flex; justify-content: space-between; font-size: 22px; font-weight: bold; color: #4a3728; border-top: 2px solid #eee; margin-top: 10px; padding-top: 10px;">
                     <span>TOTAL:</span><span id="totalText">$0.00</span>
                 </div>
             </div>
@@ -80,14 +84,23 @@
         </aside>
     </div>
 
-    <div id="modalPago" style="display:none;" class="modal-overlay">
+    <div id="modalPago" class="modal-overlay">
         <div class="card modal-content" id="modalMainContent">
-            <h3>Confirmar Pago</h3>
-            <label><input type="radio" name="metodo" value="Efectivo" checked onchange="actualizarIVA(false)"> Efectivo</label>
-            <label><input type="radio" name="metodo" value="Tarjeta" onchange="actualizarIVA(true)"> Tarjeta</label>
-            <input type="number" id="montoRecibido" style="width:100%; margin-top:10px;">
-            <button onclick="confirmarVenta()" class="btn btn-primary" style="width:100%; margin-top:10px;">Confirmar</button>
-            <button onclick="cerrarModal()" class="btn btn-secondary" style="width:100%; margin-top:5px;">Cancelar</button>
+            <h3 style="margin-top:0; text-align: center;">Finalizar Venta</h3>
+            <div style="display: flex; justify-content: space-around; margin: 20px 0;">
+                <label style="cursor:pointer;"><input type="radio" name="metodo" value="Efectivo" checked onchange="actualizarIVA(false)"> 💵 Efectivo</label>
+                <label style="cursor:pointer;"><input type="radio" name="metodo" value="Tarjeta" onchange="actualizarIVA(true)"> 💳 Tarjeta</label>
+            </div>
+
+            <div id="seccionEfectivo" style="margin-top: 15px; background: #fdfaf8; padding: 15px; border-radius: 10px; border: 1px solid #eee;">
+                <label style="font-size: 12px; color: #888;">Monto Recibido:</label>
+                <input type="number" id="montoRecibido" style="width:100%; font-size: 28px; text-align: center; border:none; background:transparent; font-weight:bold;" step="0.01">
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 25px;">
+                <button onclick="cerrarModal()" class="btn btn-secondary" style="flex:1">Atrás</button>
+                <button onclick="confirmarVenta()" class="btn btn-primary" style="flex:1">Confirmar</button>
+            </div>
         </div>
     </div>
 
@@ -98,21 +111,24 @@
         let cart = [];
         let aplicarIVA = false;
         const IVA_RATE = 0.08;
-        let inventario = InventoryDB.get();
+        let inventario = [];
+
+        // Cargar inventario desde Firebase
+        async function cargarInventario() {
+            inventario = await InventoryDB.get();
+            renderMenu();
+        }
 
         document.getElementById('dateText').textContent = new Date().toLocaleDateString();
 
-        // ORGANIZAR PRODUCTOS POR GRUPOS (Ej: Frappuccino, Soda, etc)
         function renderMenu() {
             const menuCont = document.getElementById('menuDesplegable');
-            
-            // Agrupamos: "Frappuccino - Vainilla" se vuelve Grupo: Frappuccino, Opción: Vainilla
             const grupos = {};
+            
             inventario.forEach(p => {
                 const partes = p.name.split('-');
                 const categoria = partes[0].trim();
                 const sabor = partes[1] ? partes[1].trim() : "Clásico";
-                
                 if (!grupos[categoria]) grupos[categoria] = [];
                 grupos[categoria].push({ ...p, sabor });
             });
@@ -124,7 +140,7 @@
                     </div>
                     <div class="options-list">
                         ${grupos[cat].map(item => `
-                            <div class="flavor-item" onclick="addToCart(${item.id})">
+                            <div class="flavor-item" onclick="addToCart('${item.id}')">
                                 <span>${item.sabor}</span>
                                 <span style="font-weight:bold">$${item.price.toFixed(2)}</span>
                             </div>
@@ -139,11 +155,15 @@
         };
 
         window.addToCart = (id) => {
-            const p = inventario.find(x => x.id === id);
+            const p = inventario.find(x => x.id == id);
             if(p.stock <= 0) return alert("Sin existencias");
-            const inCart = cart.find(x => x.id === id);
-            if (inCart) inCart.qty++;
-            else cart.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
+            const inCart = cart.find(x => x.id == id);
+            if (inCart) {
+                if(inCart.qty < p.stock) inCart.qty++;
+                else alert("Máximo disponible alcanzado");
+            } else {
+                cart.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
+            }
             actualizarCalculos();
         };
 
@@ -153,12 +173,12 @@
                 <tr>
                     <td>${i.name}</td>
                     <td style="text-align: center;">
-                        <button class="qty-btn" onclick="changeQty(${i.id}, -1)">-</button>
+                        <button class="qty-btn" onclick="changeQty('${i.id}', -1)">-</button>
                         ${i.qty}
-                        <button class="qty-btn" onclick="changeQty(${i.id}, 1)">+</button>
+                        <button class="qty-btn" onclick="changeQty('${i.id}', 1)">+</button>
                     </td>
                     <td style="font-weight: bold;">$${(i.qty * i.price).toFixed(2)}</td>
-                    <td><button class="del-btn" onclick="removeFromCart(${i.id})">✕</button></td>
+                    <td><button class="del-btn" onclick="removeFromCart('${i.id}')">✕</button></td>
                 </tr>
             `).join('');
             
@@ -173,27 +193,90 @@
             document.getElementById('montoRecibido').value = total.toFixed(2);
         }
 
-        // --- FUNCIONES DE CIERRE DE VENTA IGUALES A LAS ANTERIORES ---
         window.changeQty = (id, delta) => {
-            const item = cart.find(x => x.id === id);
+            const item = cart.find(x => x.id == id);
+            const p = inventario.find(x => x.id == id);
             if (item) {
+                if (delta > 0 && item.qty >= p.stock) return alert("Stock agotado");
                 item.qty += delta;
                 if (item.qty <= 0) removeFromCart(id);
                 actualizarCalculos();
             }
         };
-        window.removeFromCart = (id) => { cart = cart.filter(x => x.id !== id); actualizarCalculos(); };
-        window.actualizarIVA = (s) => { aplicarIVA = s; actualizarCalculos(); };
-        window.abrirModalPago = () => document.getElementById('modalPago').style.display='flex';
+
+        window.removeFromCart = (id) => { cart = cart.filter(x => x.id != id); actualizarCalculos(); };
+        window.actualizarIVA = (s) => { 
+            aplicarIVA = s; 
+            document.getElementById('seccionEfectivo').style.display = s ? 'none' : 'block';
+            actualizarCalculos(); 
+        };
+        window.abrirModalPago = () => {
+            if(cart.length === 0) return alert("Carrito vacío");
+            document.getElementById('modalPago').style.display='flex';
+        };
         window.cerrarModal = () => document.getElementById('modalPago').style.display='none';
 
-        window.confirmarVenta = () => {
-            // Lógica de confirmación y resta de inventario (igual que antes)
-            alert("Venta procesada con éxito");
-            location.reload();
+        window.confirmarVenta = async () => {
+            const metodo = document.querySelector('input[name="metodo"]:checked').value;
+            const subtotal = cart.reduce((s, i) => s + (i.qty * i.price), 0);
+            const iva = aplicarIVA ? (subtotal * IVA_RATE) : 0;
+            const total = subtotal + iva;
+            const montoRec = parseFloat(document.getElementById('montoRecibido').value) || 0;
+
+            if (metodo === 'Efectivo' && montoRec < total) return alert("Monto insuficiente");
+
+            const cambio = metodo === 'Efectivo' ? (montoRec - total) : 0;
+
+            // Guardar en Firebase
+            await SalesDB.save({ metodo, items: [...cart], subtotal, iva, total, recibido: montoRec, cambio });
+
+            // Actualizar stock en Firebase
+            for (const item of cart) {
+                const p = inventario.find(x => x.id == item.id);
+                await InventoryDB.updateStock(p.id, p.stock - item.qty);
+            }
+
+            const modalMain = document.getElementById('modalMainContent');
+            modalMain.innerHTML = `
+                <div style="text-align:center">
+                    <h2 style="color:#2b7a5d">¡VENTA EXITOSA!</h2>
+                    <div style="background:#f0f9f4; padding:20px; border-radius:10px; margin:15px 0; border: 1px solid #2b7a5d">
+                        <p style="margin:0; font-size:14px; color:#2b7a5d">CAMBIO A DEVOLVER:</p>
+                        <h1 style="margin:5px 0; font-size:48px; color:#1b5e20">$${cambio.toFixed(2)}</h1>
+                    </div>
+                    <button onclick="generarTicket(${subtotal}, ${iva}, ${total}, '${metodo}', ${montoRec}, ${cambio})" class="btn btn-primary" style="width:100%">IMPRIMIR TICKET</button>
+                </div>
+            `;
+        };
+
+        function generarTicket(sub, iva, tot, met, rec, cam) {
+            const ticket = document.getElementById('ticketPrint');
+            const itemsHtml = cart.map(i => `<div style="display:flex;justify-content:space-between"><span>${i.qty} x ${i.name}</span><span>$${(i.qty*i.price).toFixed(2)}</span></div>`).join('');
+
+            ticket.innerHTML = `
+                <div style="text-align:center; font-family:monospace; width:280px; margin:auto; border:1px solid #000; padding:15px; background:white;">
+                    <img src="img/Logo2.jpeg" style="width:70px; filter:grayscale(100%)">
+                    <h2 style="margin:10px 0">LA CAFEELERIA</h2>
+                    <p style="font-size:11px">${new Date().toLocaleString()}</p>
+                    <hr>
+                    ${itemsHtml}
+                    <hr>
+                    <div style="text-align:right">
+                        <p>Subtotal: $${sub.toFixed(2)}</p>
+                        ${iva > 0 ? `<p>IVA (8%): $${iva.toFixed(2)}</p>` : ''}
+                        <p><strong>TOTAL: $${tot.toFixed(2)}</strong></p>
+                        <p>Pago: ${met}</p>
+                        ${met === 'Efectivo' ? `<p>Cambio: $${cam.toFixed(2)}</p>` : ''}
+                    </div>
+                    <p style="margin-top:15px">¡Gracias por su compra!</p>
+                </div>
+            `;
+            
+            ticket.style.display = 'block';
+            setTimeout(() => { window.print(); location.reload(); }, 500);
         }
 
-        renderMenu();
+        cargarInventario();
     </script>
 </body>
 </html>
