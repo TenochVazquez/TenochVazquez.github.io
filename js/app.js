@@ -1,3 +1,21 @@
+// Gestión de Sesión (Seguridad)
+export const Auth = {
+    check() {
+        // Si no existe la sesión en sessionStorage, redirige al login
+        if (!sessionStorage.getItem('sesionActiva')) {
+            window.location.href = 'index.html';
+        }
+    },
+    login() {
+        sessionStorage.setItem('sesionActiva', 'true');
+        window.location.href = 'dashboard.html';
+    },
+    logout() {
+        sessionStorage.removeItem('sesionActiva');
+        window.location.href = 'index.html';
+    }
+};
+
 // Gestión de Inventario Local
 export const InventoryDB = {
     key: 'cafeteria_inv',
