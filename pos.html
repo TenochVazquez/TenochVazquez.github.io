@@ -5,8 +5,17 @@
     <title>Caja - La Cafeeleria</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* MANTENEMOS TU LÓGICA DE DISEÑO POS */
         .pos-container { display: grid; grid-template-columns: 1fr 420px; gap: 20px; }
+        
+        /* BARRA DE BÚSQUEDA */
+        .search-container { margin-bottom: 15px; position: relative; }
+        .search-input { 
+            width: 100%; padding: 12px 15px; border-radius: 10px; 
+            border: 2px solid #efe3d5; font-size: 16px; outline: none;
+            transition: 0.3s;
+        }
+        .search-input:focus { border-color: #cda77f; background: #fff; }
+
         .category-group { margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background: white; }
         .category-header { background: #f8f1e9; padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #4a3728; }
         .category-group.active .category-header::after { transform: rotate(180deg); }
@@ -16,7 +25,6 @@
         .flavor-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f9f9f9; cursor: pointer; transition: 0.2s; }
         .flavor-item:hover { background: #fdfaf8; padding-left: 20px; }
         
-        /* BOTONES +/- PROFESIONALES */
         .qty-wrapper { display: flex; align-items: center; background: #3d2b1f; border-radius: 6px; padding: 2px; width: 90px; justify-content: space-between; margin: 0 auto; }
         .qty-btn { background: #5d4037; color: #eecda3; border: none; width: 25px; height: 25px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; line-height: 1; }
         .qty-val { color: white; font-weight: bold; font-size: 14px; }
@@ -25,16 +33,10 @@
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { width: 400px; padding: 30px; border-radius: 15px; background: white; }
 
-        /* --- ESTILO DE IMPRESIÓN MEJORADO --- */
         @media print {
             body * { visibility: hidden; }
             #ticketPrint, #ticketPrint * { visibility: visible; }
-            #ticketPrint { 
-                position: absolute; left: 0; top: 0; width: 100%; 
-                display: block !important; 
-                background: white;
-                padding: 0;
-            }
+            #ticketPrint { position: absolute; left: 0; top: 0; width: 100%; display: block !important; background: white; padding: 0; }
             .ticket-centered { text-align: center; width: 100%; max-width: 300px; margin: 0 auto; }
             .detalle-fila { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #ccc; font-size: 16px; }
             .monto-grande { font-size: 42px; color: #2b7a5d; font-weight: 800; margin: 5px 0; }
@@ -51,7 +53,14 @@
     </header>
 
     <div class="pos-container">
-        <section class="card" style="padding: 20px;"><h3>Menú</h3><div id="menuDesplegable"></div></section>
+        <section class="card" style="padding: 20px;">
+            <h3>Menú</h3>
+            <div class="search-container">
+                <input type="text" id="menuSearch" class="search-input" placeholder="Buscar producto o sabor..." oninput="window.filterMenu()">
+            </div>
+            <div id="menuDesplegable"></div>
+        </section>
+
         <aside class="card" style="padding: 20px;">
             <h3>Cuenta</h3>
             <table id="cartTable" style="width:100%">
@@ -96,9 +105,48 @@
             document.getElementById('menuDesplegable').innerHTML = Object.keys(grupos).map(cat => `
                 <div class="category-group" id="g-${cat.replace(/\s/g,'')}">
                     <div class="category-header" onclick="document.getElementById('g-${cat.replace(/\s/g,'')}').classList.toggle('active')">${cat}</div>
-                    <div class="options-list">${grupos[cat].map(i => `<div class="flavor-item" onclick="window.addToCart('${i.id}')"><span>${i.sabor}</span><strong>$${i.price.toFixed(2)}</strong></div>`).join('')}</div>
+                    <div class="options-list">${grupos[cat].map(i => `
+                        <div class="flavor-item" data-name="${i.name.toLowerCase()}" onclick="window.addToCart('${i.id}')">
+                            <span>${i.sabor}</span>
+                            <strong>$${i.price.toFixed(2)}</strong>
+                        </div>`).join('')}
+                    </div>
                 </div>`).join('');
         }
+
+        // FUNCIÓN DE FILTRADO
+        window.filterMenu = () => {
+            const query = document.getElementById('menuSearch').value.toLowerCase();
+            const categories = document.querySelectorAll('.category-group');
+
+            categories.forEach(cat => {
+                const items = cat.querySelectorAll('.flavor-item');
+                let hasMatch = false;
+
+                items.forEach(item => {
+                    if (item.getAttribute('data-name').includes(query)) {
+                        item.style.display = 'flex';
+                        hasMatch = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                // Si hay coincidencia y estamos buscando, expandimos la categoría
+                if (query.length > 0) {
+                    if (hasMatch) {
+                        cat.style.display = 'block';
+                        cat.classList.add('active');
+                    } else {
+                        cat.style.display = 'none';
+                    }
+                } else {
+                    // Si no hay búsqueda, mostramos todo y cerramos categorías
+                    cat.style.display = 'block';
+                    cat.classList.remove('active');
+                }
+            });
+        };
 
         window.addToCart = (id) => {
             const p = inventario.find(x => x.id == id);
@@ -142,41 +190,22 @@
             const sub = cart.reduce((s, i) => s + (i.qty * i.price), 0), iva = aplicarIVA ? sub * 0.08 : 0, tot = sub + iva;
             const rec = parseFloat(document.getElementById('montoRecibido').value), cam = rec - tot;
             if (cam < 0 && !aplicarIVA) return alert("Monto insuficiente");
-            
             SalesDB.save({ metodo: aplicarIVA?'Tarjeta':'Efectivo', items: [...cart], subtotal: sub, iva, total: tot });
             cart.forEach(i => InventoryDB.updateStock(i.id, i.stock - i.qty));
-            
-            document.getElementById('modalMainContent').innerHTML = `
-                <div style="text-align:center">
-                    <p style="text-transform:uppercase; color:#888; font-size:14px;">Cambio para el cliente</p>
-                    <h1 style="font-size:48px; color:#2b7a5d; margin:10px 0;">$${cam.toFixed(2)}</h1>
-                    <button onclick="window.imprimirTicket(${sub},${iva},${tot},${rec},${cam})" class="btn btn-primary" style="width:100%; height:50px; background:#a13b2a; border:none; color:white; font-weight:bold; border-radius:10px; cursor:pointer;">IMPRIMIR TICKET</button>
-                </div>`;
+            document.getElementById('modalMainContent').innerHTML = `<div style="text-align:center"><p style="text-transform:uppercase; color:#888; font-size:14px;">Cambio para el cliente</p><h1 style="font-size:48px; color:#2b7a5d; margin:10px 0;">$${cam.toFixed(2)}</h1><button onclick="window.imprimirTicket(${sub},${iva},${tot},${rec},${cam})" class="btn btn-primary" style="width:100%; height:50px; background:#a13b2a; border:none; color:white; font-weight:bold; border-radius:10px; cursor:pointer;">IMPRIMIR TICKET</button></div>`;
         };
 
         window.imprimirTicket = (sub, iva, tot, rec, cam) => {
-            const rows = cart.map(i => `
-                <div class="detalle-fila">
-                    <span>${i.qty}x ${i.name}</span>
-                    <span style="font-weight:bold;">$${(i.qty*i.price).toFixed(2)}</span>
-                </div>`).join('');
-
-            const ivaRow = aplicarIVA ? `
-                <div class="detalle-fila" style="color: #666; font-size: 0.9em; border-bottom: none;">
-                    <span>Comisión/IVA (8%)</span>
-                    <span>$${iva.toFixed(2)}</span>
-                </div>` : '';
-
+            const rows = cart.map(i => `<div class="detalle-fila"><span>${i.qty}x ${i.name}</span><span style="font-weight:bold;">$${(i.qty*i.price).toFixed(2)}</span></div>`).join('');
+            const ivaRow = aplicarIVA ? `<div class="detalle-fila" style="color: #666; font-size: 0.9em; border-bottom: none;"><span>Comisión/IVA (8%)</span><span>$${iva.toFixed(2)}</span></div>` : '';
             document.getElementById('ticketPrint').innerHTML = `
                 <div class="ticket-centered">
                     <img src="img/Logo2.jpeg" style="width: 80px; margin-bottom: 5px; border-radius: 10px;">
                     <h2 style="margin:0; font-size:22px;">La Cafeeleria</h2>
                     <p style="color:#666; font-size:12px; margin: 5px 0;">${new Date().toLocaleString()}</p>
                     <hr style="border:none; border-top: 1px dashed #ccc; margin: 15px 0;">
-                    
                     <p style="text-transform: uppercase; font-size: 12px; color: #888; margin:0;">Total a Pagar</p>
                     <div class="monto-grande">$${tot.toFixed(2)}</div>
-                    
                     <div style="text-align: left; margin-top: 15px;">
                         ${rows}
                         ${ivaRow}
@@ -189,11 +218,9 @@
                             <span>$${cam.toFixed(2)}</span>
                         </div>
                     </div>
-                    
                     <hr style="border:none; border-top: 1px dashed #ccc; margin: 20px 0;">
-                    <p style="font-style: italic; font-size: 13px;">¡Gracias por tu compra!<br>Vuelve pronto</p>
+                    <p style="font-style: italic; font-size: 13px; text-align:center;">¡Gracias por tu compra!<br>Vuelve pronto</p>
                 </div>`;
-            
             window.print(); 
             window.location.reload();
         };
@@ -203,10 +230,8 @@
         window.abrirModalPago = () => { if(cart.length) document.getElementById('modalPago').style.display='flex'; };
         window.cerrarModal = () => document.getElementById('modalPago').style.display='none';
         
-        // Reloj y fecha
         document.getElementById('dateText').textContent = new Date().toLocaleDateString();
-        setInterval(() => { document.getElementById('time').textContent = new Date().toLocaleTimeString(); }, 1000);
-
+        setInterval(() => { if(document.getElementById('time')) document.getElementById('time').textContent = new Date().toLocaleTimeString(); }, 1000);
         renderMenu();
     </script>
 </body>
