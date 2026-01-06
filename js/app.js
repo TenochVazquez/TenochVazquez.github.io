@@ -1,4 +1,4 @@
-// Gestión de Sesión (Seguridad)
+// Gestión de Sesión (Solo funciones, no se ejecutan solas)
 export const Auth = {
     check() {
         if (!sessionStorage.getItem('sesionActiva')) {
@@ -57,7 +57,7 @@ export const SalesDB = {
     }
 };
 
-// Reloj
+// Reloj (Solo actualiza si los elementos existen en la página)
 function updateClock() {
     const elTime = document.getElementById('time');
     const elDate = document.getElementById('dateText');
