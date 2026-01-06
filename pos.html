@@ -25,7 +25,7 @@
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { width: 400px; padding: 30px; border-radius: 15px; background: white; }
 
-        /* --- ESTILO DE IMPRESIÓN IGUAL AL CORTE --- */
+        /* --- ESTILO DE IMPRESIÓN MEJORADO --- */
         @media print {
             body * { visibility: hidden; }
             #ticketPrint, #ticketPrint * { visibility: visible; }
@@ -35,8 +35,9 @@
                 background: white;
                 padding: 0;
             }
-            .detalle-fila { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #ddd; font-size: 18px; }
-            .monto-principal { font-size: 48px; color: #2b7a5d; font-weight: 800; margin: 10px 0; text-align: center; }
+            .ticket-centered { text-align: center; width: 100%; max-width: 300px; margin: 0 auto; }
+            .detalle-fila { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #ccc; font-size: 16px; }
+            .monto-grande { font-size: 42px; color: #2b7a5d; font-weight: 800; margin: 5px 0; }
         }
     </style>
 </head>
@@ -78,8 +79,7 @@
         </div>
     </div>
 
-    <div id="ticketPrint" style="display:none; font-family: sans-serif; max-width: 400px; margin: auto;">
-        </div>
+    <div id="ticketPrint" style="display:none;"></div>
 
     <script type="module">
         import { InventoryDB, SalesDB } from './js/app.js';
@@ -132,6 +132,7 @@
                     <td><button class="del-btn" onclick="window.removeFromCart('${i.id}')">✕</button></td>
                 </tr>`).join('');
             document.getElementById('subtotalText').textContent = `$${sub.toFixed(2)}`;
+            document.getElementById('ivaLabel').textContent = aplicarIVA ? "IVA (8%):" : "IVA (0%):";
             document.getElementById('ivaText').textContent = `$${iva.toFixed(2)}`;
             document.getElementById('totalText').textContent = `$${tot.toFixed(2)}`;
             document.getElementById('montoRecibido').value = tot.toFixed(2);
@@ -155,31 +156,42 @@
 
         window.imprimirTicket = (sub, iva, tot, rec, cam) => {
             const rows = cart.map(i => `
-                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #ddd;">
+                <div class="detalle-fila">
                     <span>${i.qty}x ${i.name}</span>
                     <span style="font-weight:bold;">$${(i.qty*i.price).toFixed(2)}</span>
                 </div>`).join('');
 
+            const ivaRow = aplicarIVA ? `
+                <div class="detalle-fila" style="color: #666; font-size: 0.9em; border-bottom: none;">
+                    <span>Comisión/IVA (8%)</span>
+                    <span>$${iva.toFixed(2)}</span>
+                </div>` : '';
+
             document.getElementById('ticketPrint').innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <img src="img/Logo2.jpeg" style="width: 100px; margin-bottom: 10px;">
-                    <h1 style="margin:0; font-size:24px;">La Cafeeleria</h1>
-                    <p style="color:#888; font-size:14px;">${new Date().toLocaleString()}</p>
-                    <hr style="border:none; border-top: 2px solid #f4f1ee; margin: 20px 0;">
-                    <p style="text-transform: uppercase; font-size: 14px; color: #888; margin:0;">Total Pagado</p>
-                    <div style="font-size: 48px; color: #2b7a5d; font-weight: 800; margin: 10px 0;">$${tot.toFixed(2)}</div>
-                    <div style="text-align: left; margin-top: 20px;">
+                <div class="ticket-centered">
+                    <img src="img/Logo2.jpeg" style="width: 80px; margin-bottom: 5px; border-radius: 10px;">
+                    <h2 style="margin:0; font-size:22px;">La Cafeeleria</h2>
+                    <p style="color:#666; font-size:12px; margin: 5px 0;">${new Date().toLocaleString()}</p>
+                    <hr style="border:none; border-top: 1px dashed #ccc; margin: 15px 0;">
+                    
+                    <p style="text-transform: uppercase; font-size: 12px; color: #888; margin:0;">Total a Pagar</p>
+                    <div class="monto-grande">$${tot.toFixed(2)}</div>
+                    
+                    <div style="text-align: left; margin-top: 15px;">
                         ${rows}
-                        <div style="display: flex; justify-content: space-between; padding: 10px 0; font-weight:bold; font-size:1.2em;">
-                            <span>PAGO (${aplicarIVA?'TARJETA':'EFECTIVO'}):</span>
+                        ${ivaRow}
+                        <div class="detalle-fila" style="font-weight:bold; font-size:1.1em; border-top: 1px solid #000; margin-top: 5px; border-bottom: none;">
+                            <span>PAGO CON ${aplicarIVA ? 'TARJETA' : 'EFECTIVO'}:</span>
                             <span>$${rec.toFixed(2)}</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; padding: 10px 0; color:#888;">
+                        <div class="detalle-fila" style="color:#666; border-bottom: none;">
                             <span>CAMBIO:</span>
                             <span>$${cam.toFixed(2)}</span>
                         </div>
                     </div>
-                    <p style="margin-top:30px; font-size:12px; color:#888;">¡Gracias por su preferencia!</p>
+                    
+                    <hr style="border:none; border-top: 1px dashed #ccc; margin: 20px 0;">
+                    <p style="font-style: italic; font-size: 13px;">¡Gracias por tu compra!<br>Vuelve pronto</p>
                 </div>`;
             
             window.print(); 
