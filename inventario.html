@@ -23,10 +23,7 @@
                 <img src="img/Logo2.jpeg" style="width:50px;">
                 <h1>Inventario</h1>
             </div>
-            <div style="display:flex; gap:10px;">
-                <a href="dashboard.html" class="btn btn-secondary">Volver</a>
-                <button onclick="window.logout()" style="background:#a13b2a; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer;">Cerrar Sesión</button>
-            </div>
+            <a href="dashboard.html" class="btn btn-secondary">Volver</a>
         </header>
 
         <section class="card" style="padding:25px; margin-bottom:20px; background:white; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
@@ -57,10 +54,7 @@
     </div>
 
     <script type="module">
-        import { InventoryDB, Auth } from './js/app.js';
-
-        // Verificar sesión al cargar
-        Auth.check();
+        import { InventoryDB } from './js/app.js';
 
         const render = () => {
             const data = InventoryDB.get();
@@ -84,7 +78,7 @@
             }).join('');
         };
 
-        // Hacer funciones globales para que los botones las encuentren
+        // Funciones globales para los botones +/-
         window.modificarStock = (id, cambio) => {
             const inv = InventoryDB.get();
             const producto = inv.find(p => p.id == id);
@@ -102,8 +96,6 @@
                 render();
             }
         };
-
-        window.logout = () => Auth.logout();
 
         document.getElementById('formAdd').onsubmit = (e) => {
             e.preventDefault();
