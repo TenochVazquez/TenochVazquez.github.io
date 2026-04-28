@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Panel Escolar</title>
+    <style>
+        :root { --primary: #10b981; --dark: #064e3b; --bg: #f3f4f6; --accent: #f59e0b; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; background: var(--bg); }
+        .sidebar { width: 260px; background: var(--dark); color: white; height: 100vh; position: fixed; padding: 20px; box-sizing: border-box; }
+        .main { margin-left: 260px; padding: 40px; width: calc(100% - 260px); box-sizing: border-box; }
+        .card { background: white; padding: 25px; border-radius: 12px; margin-bottom: 20px; border-top: 4px solid var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .btn-cycle { background: var(--accent); color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; transition: 0.3s; }
+        .btn-cycle:hover { background: #d97706; }
+        .btn-add { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .hidden { display: none; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+        .nav-item { padding: 12px; cursor: pointer; border-radius: 8px; transition: 0.2s; margin-bottom: 5px; }
+        .nav-item:hover { background: rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h2 style="color: var(--primary); text-align: center;">🌿 Admin Panel</h2>
+    <div class="nav-item" onclick="show('jefes')">👤 Jefes de Grupo</div>
+    <div class="nav-item" onclick="show('alumnos')">👥 Alumnos</div>
+    <div class="nav-item" onclick="show('reportes')">📊 Historial</div>
+    <hr style="opacity: 0.2; margin: 20px 0;">
+    <button class="btn-cycle" onclick="actualizarCiclo()">🔄 Promover Ciclo (+100)</button>
+    <div class="nav-item" onclick="window.location.href='index.html'" style="color:#ff8a8a; margin-top:30px;">Cerrar Sesión</div>
+</div>
+
+<div class="main">
+    <div id="sec-jefes">
+        <div class="card">
+            <h3>Registrar Jefe de Grupo</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <input type="text" id="jNom" placeholder="Nombre">
+                <input type="email" id="jEma" placeholder="Correo">
+                <input type="password" id="jPas" placeholder="Pass">
+                <select id="jCla"></select>
+            </div>
+            <button class="btn-add" style="margin-top: 15px;" onclick="addJefe()">Crear Jefe</button>
+            <table id="tJefes">
+                <thead><tr><th>Nombre</th><th>Grupo</th><th>Email</th><th>Acción</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <div id="sec-alumnos" class="hidden">
+        <div class="card">
+            <h3>Inscribir Alumno</h3>
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px;">
+                <input type="text" id="aNom" placeholder="Nombre Alumno">
+                <select id="aCla"></select>
+                <button class="btn-add" onclick="addAlu()">Añadir</button>
+            </div>
+            <table id="tAlu">
+                <thead><tr><th>Alumno</th><th>Grupo</th><th>Acción</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <div id="sec-reportes" class="hidden">
+        <div class="card"><h3>Historial</h3><div id="hist"></div></div>
+    </div>
+</div>
+
+<script>
+    // Generador de grupos nuevos
+    function generarGruposBase() {
+        let base = [];
+        [1, 3, 5].forEach(p => { for(let i=1; i<=13; i++) base.push(Number(p * 100 + i)); });
+        return base;
+    }
+
+    // Inicialización limpia
+    let clases = JSON.parse(localStorage.getItem('config_clases')) || generarGruposBase();
+    let jefes = JSON.parse(localStorage.getItem('jefes')) || [];
+    let alus = JSON.parse(localStorage.getItem('alumnos')) || [];
+
+    function sync() {
+        localStorage.setItem('config_clases', JSON.stringify(clases));
+        localStorage.setItem('jefes', JSON.stringify(jefes));
+        localStorage.setItem('alumnos', JSON.stringify(alus));
+    }
+
+    function renderSelects() {
+        const ocupados = jefes.map(j => Number(j.cla));
+        // IMPORTANTE: Se muestran solo las clases del catálogo actual
+        const disponibles = clases.filter(c => !ocupados.includes(Number(c)));
+        document.getElementById('jCla').innerHTML = disponibles.map(c => `<option value="${c}">${c}</option>`).join('');
+        document.getElementById('aCla').innerHTML = clases.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    function addJefe() {
+        const nom = document.getElementById('jNom').value.trim();
+        const cla = Number(document.getElementById('jCla').value);
+        if(!nom || !cla) return alert("Datos incompletos");
+        jefes.push({id: Date.now(), nom, email: document.getElementById('jEma').value, pass: document.getElementById('jPas').value, cla});
+        sync(); renderJefes(); renderSelects();
+        document.getElementById('jNom').value = "";
+    }
+
+    function renderJefes() {
+        document.querySelector('#tJefes tbody').innerHTML = jefes.map(j => `<tr><td>${j.nom}</td><td><b>${j.cla}</b></td><td>${j.email}</td><td><button onclick="delJ(${j.id})" style="color:red; cursor:pointer; border:none; background:none;">Eliminar</button></td></tr>`).join('');
+    }
+
+    function delJ(id) { jefes = jefes.filter(j => j.id !== id); sync(); renderJefes(); renderSelects(); }
+
+    function addAlu() {
+        const nom = document.getElementById('aNom').value.trim();
+        const cla = Number(document.getElementById('aCla').value);
+        if(!nom) return;
+        alus.push({id: Date.now(), nom, cla});
+        sync(); renderAlu();
+        document.getElementById('aNom').value = "";
+    }
+
+    function renderAlu() {
+        document.querySelector('#tAlu tbody').innerHTML = alus.map(a => `<tr><td>${a.nom}</td><td><b>${a.cla}</b></td><td><button onclick="delA(${a.id})" style="color:red; cursor:pointer; border:none; background:none;">Quitar</button></td></tr>`).join('');
+    }
+
+    function delA(id) { alus = alus.filter(a => a.id !== id); sync(); renderAlu(); }
+
+    function actualizarCiclo() {
+        if(!confirm("¿Promover ciclo académico?\n\n- Los grupos subirán +100.\n- Los grupos antiguos se borrarán para dar paso a los nuevos.\n- Alumnos en 6xx serán eliminados.")) return;
+        
+        // 1. Graduar alumnos (eliminar 600+)
+        jefes = jefes.filter(j => Number(j.cla) < 600);
+        alus = alus.filter(a => Number(a.cla) < 600);
+        
+        // 2. Promover datos existentes (+100)
+        jefes = jefes.map(j => ({ ...j, cla: Number(j.cla) + 100 }));
+        alus = alus.map(a => ({ ...a, cla: Number(a.cla) + 100 }));
+        
+        // 3. RECONSTRUCCIÓN TOTAL DEL CATÁLOGO
+        // Tomamos los que ya no están en 600 y los subimos
+        let nuevasClases = clases.filter(c => Number(c) < 600).map(c => Number(c) + 100);
+        
+        // Obtenemos los grupos base (101, 301, 501)
+        let base = generarGruposBase();
+        
+        // Creamos el nuevo catálogo uniendo los promovidos y la base nueva
+        // Esto automáticamente descarta los 1xx, 3xx y 5xx anteriores porque fueron transformados a 2xx, 4xx y 6xx
+        clases = [...new Set([...nuevasClases, ...base])].sort((a,b) => a-b);
+
+        sync();
+        alert("Ciclo actualizado. Los grupos han sido promovidos.");
+        window.location.replace(window.location.href);
+    }
+
+    function show(id) {
+        document.getElementById('sec-jefes').classList.add('hidden');
+        document.getElementById('sec-alumnos').classList.add('hidden');
+        document.getElementById('sec-reportes').classList.add('hidden');
+        document.getElementById('sec-' + id).classList.remove('hidden');
+        if(id === 'reportes') {
+            const h = JSON.parse(localStorage.getItem('historial')) || [];
+            document.getElementById('hist').innerHTML = h.reverse().map(r => `<div style="border-bottom:1px solid #eee; padding:10px;"><b>${r.fecha}</b> - Grupo ${r.cla}: ${r.detalles}</div>`).join('');
+        }
+    }
+    
+    // Al cargar, refrescamos los selects para asegurar limpieza
+    renderJefes(); renderAlu(); renderSelects();
+</script>
+</body>
+</html>

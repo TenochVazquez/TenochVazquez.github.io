@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Pase de Lista</title>
+    <style>
+        :root { --primary: #10b981; --dark: #065f46; --error: #ef4444; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #10b981 0%, #059669 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0; }
+        .login-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); width: 100%; max-width: 380px; }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { color: var(--dark); margin: 0; font-size: 26px; }
+        .form-group { margin-bottom: 20px; position: relative; }
+        label { display: block; color: #374151; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        input { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; box-sizing: border-box; }
+        .toggle-pass { position: absolute; right: 12px; top: 38px; cursor: pointer; color: #6b7280; font-size: 12px; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; user-select: none; }
+        #errorMsg { color: var(--error); background: #fee2e2; padding: 10px; border-radius: 6px; font-size: 13px; text-align: center; margin-bottom: 15px; display: none; border: 1px solid #fecaca; }
+        button.enter { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        button.enter:hover { background: #047857; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <div class="header"><h1>🌿 Bienvenida</h1><p>Sistema de Control Escolar</p></div>
+        <div id="errorMsg">⚠️ Usuario o contraseña incorrectos</div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Correo Electrónico</label>
+                <input type="email" id="email" required placeholder="admin@sistema.com">
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="password" required>
+                <span class="toggle-pass" onclick="togglePass()">👁️ Ver</span>
+            </div>
+            <button type="submit" class="enter">Entrar</button>
+        </form>
+    </div>
+    <script>
+        function togglePass() {
+            const p = document.getElementById('password');
+            p.type = p.type === 'password' ? 'text' : 'password';
+        }
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            const err = document.getElementById('errorMsg');
+            err.style.display = 'none';
+
+            if(email === 'admin@sistema.com' && pass === 'admin123') {
+                window.location.href = 'admin.html';
+                return;
+            }
+
+            const jefes = JSON.parse(localStorage.getItem('jefes')) || [];
+            const found = jefes.find(j => j.email === email && j.pass === pass);
+            if(found) {
+                localStorage.setItem('jefeSesion', JSON.stringify(found));
+                window.location.href = 'jefe.html';
+            } else {
+                err.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

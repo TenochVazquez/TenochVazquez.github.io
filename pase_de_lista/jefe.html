@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pase de Lista - Jefe de Grupo</title>
+    <style>
+        :root { 
+            --primary: #10b981; 
+            --dark: #064e3b; 
+            --light: #f0fdf4; 
+            --bg: #f9fafb; 
+        }
+        
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            padding: 20px; 
+            color: #374151; 
+        }
+
+        .container { 
+            max-width: 500px; 
+            margin: 20px auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+            border-top: 5px solid var(--primary);
+        }
+
+        .header { 
+            text-align: center; 
+            margin-bottom: 25px; 
+        }
+
+        .header h2 { 
+            color: var(--dark); 
+            margin: 0; 
+            font-size: 24px; 
+        }
+
+        .group-badge { 
+            display: inline-block;
+            background: var(--light); 
+            color: var(--dark); 
+            padding: 5px 15px; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            margin-top: 10px;
+            font-size: 14px;
+            border: 1px solid #d1fae5;
+        }
+
+        .list-container { 
+            margin-top: 20px; 
+        }
+
+        .student-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 15px; 
+            border-bottom: 1px solid #f3f4f6; 
+            transition: 0.2s;
+        }
+
+        .student-row:hover {
+            background: #fafafa;
+        }
+
+        .student-name {
+            font-weight: 500;
+            color: #1f2937;
+        }
+
+        /* Estilo del Checkbox */
+        input[type="checkbox"] { 
+            width: 22px; 
+            height: 22px; 
+            accent-color: var(--primary); 
+            cursor: pointer; 
+        }
+
+        .btn-submit { 
+            width: 100%; 
+            padding: 15px; 
+            background: var(--dark); 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            font-size: 16px; 
+            cursor: pointer; 
+            margin-top: 30px; 
+            transition: 0.3s;
+        }
+
+        .btn-submit:hover { 
+            background: var(--primary); 
+            transform: translateY(-2px);
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #9ca3af;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .empty-msg {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2 id="jefeName">Cargando...</h2>
+        <div class="group-badge" id="groupBadge">Grupo: --</div>
+    </div>
+
+    <div class="list-container" id="studentList">
+        </div>
+
+    <button class="btn-submit" onclick="enviarAsistencia()">✅ Finalizar Pase de Lista</button>
+    
+    <div class="footer-link" onclick="cerrarSesion()">Cerrar Sesión</div>
+</div>
+
+<script>
+    // Recuperar datos de la sesión actual
+    const jefeSesion = JSON.parse(localStorage.getItem('jefeSesion'));
+    
+    // Si no hay sesión, regresarlo al login
+    if (!jefeSesion) {
+        window.location.href = 'index.html';
+    }
+
+    // Actualizar Interfaz
+    document.getElementById('jefeName').innerText = "Hola, " + jefeSesion.nom;
+    document.getElementById('groupBadge').innerText = "Jefe del Grupo " + jefeSesion.cla;
+
+    function cargarAlumnos() {
+        const alusGlobales = JSON.parse(localStorage.getItem('alumnos')) || [];
+        // Filtrar solo los alumnos que coincidan con la clase del jefe logueado
+        const misAlus = alusGlobales.filter(a => a.cla == jefeSesion.cla);
+        const contenedor = document.getElementById('studentList');
+
+        if (misAlus.length === 0) {
+            contenedor.innerHTML = '<div class="empty-msg">No hay alumnos registrados en tu grupo.</div>';
+            return;
+        }
+
+        contenedor.innerHTML = misAlus.map(a => `
+            <div class="student-row">
+                <span class="student-name">${a.nom}</span>
+                <input type="checkbox" class="check-asist" data-nom="${a.nom}">
+            </div>
+        `).join('');
+    }
+
+    function enviarAsistencia() {
+        const checks = document.querySelectorAll('.check-asist');
+        if (checks.length === 0) return alert("No hay alumnos para pasar lista.");
+
+        let resultados = [];
+        checks.forEach(c => {
+            resultados.push(`${c.checked ? '✅' : '❌'} ${c.dataset.nom}`);
+        });
+
+        // Crear el registro de hoy
+        const registro = {
+            fecha: new Date().toLocaleString(),
+            jefe: jefeSesion.nom,
+            cla: jefeSesion.cla,
+            detalles: resultados.join(' | ')
+        };
+
+        // Guardar en el historial general (que lee el admin)
+        let historial = JSON.parse(localStorage.getItem('historial')) || [];
+        historial.push(registro);
+        localStorage.setItem('historial', JSON.stringify(historial));
+
+        alert('Pase de lista guardado con éxito. Se ha enviado al Administrador.');
+        window.location.href = 'index.html';
+    }
+
+    function cerrarSesion() {
+        localStorage.removeItem('jefeSesion');
+        window.location.href = 'index.html';
+    }
+
+    // Inicializar lista
+    cargarAlumnos();
+</script>
+
+</body>
+</html>
