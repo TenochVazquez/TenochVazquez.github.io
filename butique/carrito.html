@@ -255,7 +255,7 @@ function finalizarCompraConTicket() {
 
     doc.save(`Ticket_Luna_${folio}.pdf`);
     const miNumero = "526331352647";
-    const msg = `🎀 *NUEVO PEDIDO BOUTIQUE LUNA* 🎀\n\nFolio: *${folio}*\nCliente: ${telCliente}\nTotal: *$${total.toLocaleString()} MXN*\nMétodo: ${metodoSeleccionado}\n\n_El cliente ha descargado su ticket PDF._`;
+    const msg = `🎀 *NUEVO PEDIDO BOUTIQUE LUNA* 🎀\n\nFolio: *${folio}*\nCliente: ${telCliente}\nTotal: *$${total.toLocaleString()} MXN*\nMétodo: ${metodoSeleccionado}\n\n_Gracias por su compra._`;
     
     window.open(`https://wa.me/${miNumero}?text=${encodeURIComponent(msg)}`, '_blank');
     
