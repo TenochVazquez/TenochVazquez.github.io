@@ -254,7 +254,7 @@ function finalizarCompraConTicket() {
     doc.text("Gracias por elegir Boutique Luna", 40, y, { align: "center" });
 
     doc.save(`Ticket_Luna_${folio}.pdf`);
-    const miNumero = "526331252647";
+    const miNumero = "526331352647";
     const msg = `🎀 *NUEVO PEDIDO BOUTIQUE LUNA* 🎀\n\nFolio: *${folio}*\nCliente: ${telCliente}\nTotal: *$${total.toLocaleString()} MXN*\nMétodo: ${metodoSeleccionado}\n\n_El cliente ha descargado su ticket PDF._`;
     
     window.open(`https://wa.me/${miNumero}?text=${encodeURIComponent(msg)}`, '_blank');
