@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Carrito | Boutique Luna</title>
-    <!-- Librería PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root { 
@@ -18,17 +17,14 @@
 
         body { margin: 0; font-family: 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: var(--oscuro); padding-bottom: 50px; }
         
-        /* Header recuperado con estilo */
         header { background: var(--secundario); color: var(--primario); padding: 3.5rem 1rem; text-align: center; border-bottom: 1px solid var(--acento); }
         header h1 { margin: 0; font-size: 2.8rem; font-weight: 300; text-transform: uppercase; letter-spacing: 5px; }
         header p { margin-top: 10px; opacity: 0.8; font-style: italic; }
 
         .container { max-width: 900px; margin: -40px auto 0; padding: 0 1rem; }
         
-        /* Card del carrito con sombra profunda */
         .cart-card { background: var(--blanco); border-radius: 25px; padding: 2.5rem; box-shadow: 0 20px 50px rgba(0,0,0,0.1); position: relative; }
 
-        /* Items con diseño de boutique */
         .cart-item { display: flex; align-items: center; padding: 1.5rem 0; border-bottom: 1px solid #f1f1f1; gap: 20px; transition: 0.3s; }
         .cart-item:hover { transform: translateX(5px); }
         .cart-item img { width: 90px; height: 90px; object-fit: cover; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
@@ -40,7 +36,6 @@
         .btn-remove { background: #fff0f3; border: none; color: #ff5252; cursor: pointer; padding: 10px 15px; border-radius: 10px; font-weight: bold; transition: 0.2s; }
         .btn-remove:hover { background: #ff5252; color: white; }
 
-        /* Resumen de Pago */
         .total-section { margin-top: 2.5rem; padding: 2rem; background: var(--secundario); border-radius: 20px; text-align: right; border: 1px solid var(--acento); }
         .total-section h2 { margin: 0; color: var(--primario); font-size: 2.5rem; }
         
@@ -53,7 +48,6 @@
         .btn-pay:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(136,14,79,0.3); }
         .btn-pay small { font-size: 0.7rem; font-weight: normal; text-transform: none; opacity: 0.8; }
 
-        /* Modales Profesionales */
         .modal-overlay { 
             position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); 
             display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px);
@@ -118,7 +112,6 @@
     <a href="index.html" class="btn-back">← CONTINUAR COMPRANDO</a>
 </main>
 
-<!-- MODAL DATOS CLIENTE -->
 <div id="modalDatos" class="modal-overlay">
     <div class="modal">
         <div style="font-size: 3rem; margin-bottom: 10px;">📄</div>
@@ -132,7 +125,7 @@
     </div>
 </div>
 
-<!-- MODAL VACIAR -->
+
 <div id="modalVaciar" class="modal-overlay">
     <div class="modal">
         <h3>¿Vaciar carrito?</h3>
@@ -216,7 +209,6 @@ function finalizarCompraConTicket() {
     const total = carrito.reduce((acc, p) => acc + p.precio, 0);
     const folio = "LN-" + Math.floor(Math.random() * 99999);
 
-    // GENERACIÓN PDF TICKET
     const doc = new jsPDF({ unit: 'mm', format: [80, 160] });
     
     doc.setFont("helvetica", "bold");
@@ -261,11 +253,8 @@ function finalizarCompraConTicket() {
     doc.setFont("helvetica", "italic");
     doc.text("Gracias por elegir Boutique Luna", 40, y, { align: "center" });
 
-    // Guardar ticket
     doc.save(`Ticket_Luna_${folio}.pdf`);
-
-    // Enviar a WhatsApp de la tienda
-    const miNumero = "526331252647"; // Reemplaza con tu número
+    const miNumero = "526331252647";
     const msg = `🎀 *NUEVO PEDIDO BOUTIQUE LUNA* 🎀\n\nFolio: *${folio}*\nCliente: ${telCliente}\nTotal: *$${total.toLocaleString()} MXN*\nMétodo: ${metodoSeleccionado}\n\n_El cliente ha descargado su ticket PDF._`;
     
     window.open(`https://wa.me/${miNumero}?text=${encodeURIComponent(msg)}`, '_blank');
