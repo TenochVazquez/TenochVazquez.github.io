@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Carrito | Boutique Luna</title>
+    <!-- Librería PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root { 
+            --primario: #880e4f; 
+            --secundario: #fce4ec; 
+            --acento: #f8bbd9; 
+            --blanco: #fff;
+            --oscuro: #2d3436;
+            --texto-suave: #636e72;
+        }
+
+        body { margin: 0; font-family: 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: var(--oscuro); padding-bottom: 50px; }
+        
+        /* Header recuperado con estilo */
+        header { background: var(--secundario); color: var(--primario); padding: 3.5rem 1rem; text-align: center; border-bottom: 1px solid var(--acento); }
+        header h1 { margin: 0; font-size: 2.8rem; font-weight: 300; text-transform: uppercase; letter-spacing: 5px; }
+        header p { margin-top: 10px; opacity: 0.8; font-style: italic; }
+
+        .container { max-width: 900px; margin: -40px auto 0; padding: 0 1rem; }
+        
+        /* Card del carrito con sombra profunda */
+        .cart-card { background: var(--blanco); border-radius: 25px; padding: 2.5rem; box-shadow: 0 20px 50px rgba(0,0,0,0.1); position: relative; }
+
+        /* Items con diseño de boutique */
+        .cart-item { display: flex; align-items: center; padding: 1.5rem 0; border-bottom: 1px solid #f1f1f1; gap: 20px; transition: 0.3s; }
+        .cart-item:hover { transform: translateX(5px); }
+        .cart-item img { width: 90px; height: 90px; object-fit: cover; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        
+        .item-info { flex-grow: 1; }
+        .item-info h4 { margin: 0; color: var(--oscuro); font-size: 1.2rem; font-weight: 500; }
+        .item-price { font-weight: bold; color: var(--primario); font-size: 1.1rem; display: block; margin-top: 4px; }
+        
+        .btn-remove { background: #fff0f3; border: none; color: #ff5252; cursor: pointer; padding: 10px 15px; border-radius: 10px; font-weight: bold; transition: 0.2s; }
+        .btn-remove:hover { background: #ff5252; color: white; }
+
+        /* Resumen de Pago */
+        .total-section { margin-top: 2.5rem; padding: 2rem; background: var(--secundario); border-radius: 20px; text-align: right; border: 1px solid var(--acento); }
+        .total-section h2 { margin: 0; color: var(--primario); font-size: 2.5rem; }
+        
+        .payment-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.2rem; margin-top: 2rem; }
+        .btn-pay { 
+            padding: 18px; background: var(--primario); color: white; border: none; border-radius: 15px; 
+            font-weight: bold; cursor: pointer; transition: 0.4s; text-transform: uppercase; letter-spacing: 1px;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+        }
+        .btn-pay:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(136,14,79,0.3); }
+        .btn-pay small { font-size: 0.7rem; font-weight: normal; text-transform: none; opacity: 0.8; }
+
+        /* Modales Profesionales */
+        .modal-overlay { 
+            position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); 
+            display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px);
+        }
+        .modal { background: white; padding: 2.5rem; border-radius: 30px; max-width: 420px; width: 90%; text-align: center; }
+        .modal h3 { color: var(--primario); font-size: 1.6rem; margin-bottom: 10px; }
+        .modal input { 
+            width: 100%; padding: 15px; margin: 20px 0; border: 2px solid var(--secundario); border-radius: 12px; 
+            font-size: 1.1rem; text-align: center; outline: none; transition: 0.3s;
+        }
+        .modal input:focus { border-color: var(--primario); }
+        .modal-btns { display: flex; gap: 12px; margin-top: 20px; }
+        
+        .btn-confirm { background: var(--primario); color: white; border: none; padding: 15px; border-radius: 12px; cursor: pointer; flex: 1; font-weight: bold; }
+        .btn-cancel { background: #f5f5f5; color: #777; border: none; padding: 15px; border-radius: 12px; cursor: pointer; flex: 1; }
+
+        .clear-cart { display: inline-block; margin-top: 2rem; color: #ff5252; cursor: pointer; opacity: 0.7; font-size: 0.9rem; }
+        .clear-cart:hover { opacity: 1; text-decoration: underline; }
+        
+        .empty-msg { text-align: center; padding: 5rem 1rem; color: #bbb; }
+        .btn-back { display: block; text-align: center; margin-top: 2.5rem; color: var(--primario); text-decoration: none; font-weight: bold; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Boutique Luna</h1>
+    <p>Exclusividad & Estilo en tu pedido</p>
+</header>
+
+<main class="container">
+    <div class="cart-card">
+        <div id="cart-items-container"></div>
+
+        <div id="cart-summary" style="display: none;">
+            <div class="total-section">
+                <span style="text-transform: uppercase; color: var(--primario); font-weight: bold; letter-spacing: 2px;">Total de compra</span>
+                <h2 id="total-amount">$0.00</h2>
+            </div>
+
+            <p style="text-align: center; margin-top: 2.5rem; font-weight: bold; letter-spacing: 1px;">MÉTODO DE PAGO</p>
+            <div class="payment-grid">
+                <button class="btn-pay" onclick="abrirPasoDatos('Efectivo')">
+                    <span>💵 Efectivo</span>
+                    <small>Pago en boutique</small>
+                </button>
+                <button class="btn-pay" onclick="abrirPasoDatos('Transferencia')">
+                    <span>💳 Transferencia</span>
+                    <small>Depósito inmediato</small>
+                </button>
+                <button class="btn-pay" onclick="abrirPasoDatos('Tarjeta')">
+                    <span>✨ Tarjeta</span>
+                    <small>Débito / Crédito</small>
+                </button>
+            </div>
+            
+            <div style="text-align: center;">
+                <span class="clear-cart" onclick="confirmarVaciar()">🗑️ Vaciar todo el carrito</span>
+            </div>
+        </div>
+    </div>
+    <a href="index.html" class="btn-back">← CONTINUAR COMPRANDO</a>
+</main>
+
+<!-- MODAL DATOS CLIENTE -->
+<div id="modalDatos" class="modal-overlay">
+    <div class="modal">
+        <div style="font-size: 3rem; margin-bottom: 10px;">📄</div>
+        <h3>Datos de Envío</h3>
+        <p>Introduce tu WhatsApp para generar tu ticket oficial y procesar el pedido.</p>
+        <input type="tel" id="cliente-tel" placeholder="Tu número (ej: 521XXXXXXXXXX)">
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="cerrarModal('modalDatos')">Regresar</button>
+            <button class="btn-confirm" onclick="finalizarCompraConTicket()">Confirmar y Generar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL VACIAR -->
+<div id="modalVaciar" class="modal-overlay">
+    <div class="modal">
+        <h3>¿Vaciar carrito?</h3>
+        <p>Esta acción eliminará todos tus artículos seleccionados.</p>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="cerrarModal('modalVaciar')">No, esperar</button>
+            <button class="btn-confirm" onclick="vaciarCarrito()">Sí, vaciar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let metodoSeleccionado = "";
+const { jsPDF } = window.jspdf;
+
+document.addEventListener('DOMContentLoaded', cargarCarrito);
+
+function cargarCarrito() {
+    const container = document.getElementById('cart-items-container');
+    const summary = document.getElementById('cart-summary');
+    const carrito = JSON.parse(localStorage.getItem('carritoLuna')) || [];
+    
+    if (carrito.length === 0) {
+        container.innerHTML = `
+            <div class="empty-msg">
+                <div style="font-size: 80px; margin-bottom: 20px;">🛍️</div>
+                <p>Tu carrito de compras está vacío.</p>
+            </div>`;
+        summary.style.display = 'none';
+        return;
+    }
+
+    summary.style.display = 'block';
+    container.innerHTML = '';
+    let total = 0;
+
+    carrito.forEach((prod, index) => {
+        total += prod.precio;
+        container.innerHTML += `
+            <div class="cart-item">
+                <img src="${prod.imagen}" alt="${prod.nombre}">
+                <div class="item-info">
+                    <h4>${prod.nombre}</h4>
+                    <span class="item-price">$${prod.precio.toLocaleString('es-MX')} MXN</span>
+                </div>
+                <button class="btn-remove" onclick="eliminarItem(${index})">Quitar</button>
+            </div>`;
+    });
+    document.getElementById('total-amount').innerText = `$${total.toLocaleString('es-MX')} MXN`;
+}
+
+function eliminarItem(index) {
+    let carrito = JSON.parse(localStorage.getItem('carritoLuna'));
+    carrito.splice(index, 1);
+    localStorage.setItem('carritoLuna', JSON.stringify(carrito));
+    cargarCarrito();
+}
+
+function confirmarVaciar() { document.getElementById('modalVaciar').style.display = 'flex'; }
+function vaciarCarrito() {
+    localStorage.removeItem('carritoLuna');
+    cerrarModal('modalVaciar');
+    cargarCarrito();
+}
+
+function abrirPasoDatos(metodo) {
+    metodoSeleccionado = metodo;
+    document.getElementById('modalDatos').style.display = 'flex';
+}
+
+function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
+
+function finalizarCompraConTicket() {
+    const telCliente = document.getElementById('cliente-tel').value;
+    if (telCliente.length < 10) {
+        alert("Ingresa un número de WhatsApp válido.");
+        return;
+    }
+
+    const carrito = JSON.parse(localStorage.getItem('carritoLuna'));
+    const total = carrito.reduce((acc, p) => acc + p.precio, 0);
+    const folio = "LN-" + Math.floor(Math.random() * 99999);
+
+    // GENERACIÓN PDF TICKET
+    const doc = new jsPDF({ unit: 'mm', format: [80, 160] });
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("BOUTIQUE LUNA", 40, 15, { align: "center" });
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.text("Moda & Exclusividad", 40, 20, { align: "center" });
+    doc.text("--------------------------------------------------", 40, 25, { align: "center" });
+    
+    doc.setFontSize(8);
+    doc.text(`TICKET: ${folio}`, 10, 32);
+    doc.text(`FECHA: ${new Date().toLocaleString()}`, 10, 37);
+    doc.text(`CLIENTE WHATSAPP: ${telCliente}`, 10, 42);
+    doc.text("--------------------------------------------------", 40, 47, { align: "center" });
+
+    let y = 55;
+    doc.setFont("helvetica", "bold");
+    doc.text("ARTÍCULO", 10, y);
+    doc.text("TOTAL", 70, y, { align: "right" });
+    
+    doc.setFont("helvetica", "normal");
+    y += 6;
+    carrito.forEach(p => {
+        doc.text(p.nombre.substring(0, 22), 10, y);
+        doc.text(`$${p.precio.toLocaleString()}`, 70, y, { align: "right" });
+        y += 5;
+    });
+
+    y += 5;
+    doc.text("--------------------------------------------------", 40, y, { align: "center" });
+    y += 10;
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("TOTAL:", 10, y);
+    doc.text(`$${total.toLocaleString()} MXN`, 70, y, { align: "right" });
+    
+    y += 12;
+    doc.setFontSize(9);
+    doc.text(`MÉTODO: ${metodoSeleccionado}`, 40, y, { align: "center" });
+    y += 10;
+    doc.setFont("helvetica", "italic");
+    doc.text("Gracias por elegir Boutique Luna", 40, y, { align: "center" });
+
+    // Guardar ticket
+    doc.save(`Ticket_Luna_${folio}.pdf`);
+
+    // Enviar a WhatsApp de la tienda
+    const miNumero = "521234567890"; // Reemplaza con tu número
+    const msg = `🎀 *NUEVO PEDIDO BOUTIQUE LUNA* 🎀\n\nFolio: *${folio}*\nCliente: ${telCliente}\nTotal: *$${total.toLocaleString()} MXN*\nMétodo: ${metodoSeleccionado}\n\n_El cliente ha descargado su ticket PDF._`;
+    
+    window.open(`https://wa.me/${miNumero}?text=${encodeURIComponent(msg)}`, '_blank');
+    
+    localStorage.removeItem('carritoLuna');
+    location.reload();
+}
+</script>
+
+</body>
+</html>

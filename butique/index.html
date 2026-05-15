@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boutique Luna | Inicio</title>
+  <style>
+    :root { --primario: #880e4f; --secundario: #fce4ec; --acento: #f8bbd9; --texto: #333; --blanco: #fff; }
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #fafafa; color: var(--texto); line-height: 1.6; }
+    .cart-float { position: fixed; bottom: 30px; right: 30px; background: var(--primario); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 8px 20px rgba(136,14,79,0.3); z-index: 1000; font-size: 1.8rem; transition: 0.3s; }
+    .cart-float:hover { transform: scale(1.1); background: #6a0b3d; }
+    header { background: var(--secundario); color: var(--primario); padding: 4rem 1rem; text-align: center; border-bottom: 1px solid var(--acento); }
+    header h1 { margin: 0; font-size: 3rem; font-weight: 300; letter-spacing: 4px; text-transform: uppercase; }
+    .hero { display: grid; place-items: center; padding: 6rem 2rem; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat; color: #fff; text-align: center; }
+    .section { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem; }
+    .card { background: var(--blanco); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; transition: 0.3s; border: 1px solid transparent; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
+    .card:hover { transform: translateY(-10px); border-color: var(--acento); box-shadow: 0 15px 40px rgba(136,14,79,0.1); }
+    .card img { width: 100%; height: 300px; object-fit: cover; }
+    .card-content { padding: 2rem; text-align: center; }
+    .card-content h4 { margin: 0 0 1rem; font-size: 1.5rem; color: var(--primario); text-transform: uppercase; font-weight: 400; }
+    .contact-card { background: var(--secundario); justify-content: center; }
+    footer { text-align: center; padding: 3rem; background: var(--primario); color: white; margin-top: 5rem; letter-spacing: 2px; }
+  </style>
+</head>
+<body>
+  <a href="carrito.html" class="cart-float">🛒</a>
+  <header>
+    <h1>Boutique Luna</h1>
+    <p>Moda exclusiva y estilo contemporáneo</p>
+  </header>
+  <section class="hero">
+    <div><h2 style="font-size: 3.5rem; margin:0;">Estilo Único</h2><p style="font-size: 1.3rem;">Piezas seleccionadas para quienes buscan distinción.</p></div>
+  </section>
+  <main class="section">
+    <div class="cards">
+      <a href="contacto.html" class="card contact-card">
+        <div class="card-content"><span style="font-size: 3rem;">✉️</span><h4>Atención</h4><p>Contacto directo y pedidos especiales.</p></div>
+      </a>
+      <a href="moda-femenina.html" class="card">
+        <img src="https://images.unsplash.com/photo-1521334884684-d80222895322?auto=format&fit=crop&w=800&q=80">
+        <div class="card-content"><h4>Moda Femenina</h4><p>Elegancia en cada detalle.</p></div>
+      </a>
+      <a href="casual-chico.html" class="card">
+        <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=800&q=80">
+        <div class="card-content"><h4>Casual Chico</h4><p>Confort con estilo moderno.</p></div>
+      </a>
+      <a href="accesorios.html" class="card">
+        <img src="https://images.unsplash.com/photo-1520975661517-d6d914f8ea77?auto=format&fit=crop&w=800&q=80">
+        <div class="card-content"><h4>Accesorios</h4><p>Complementos sofisticados.</p></div>
+      </a>
+    </div>
+  </main>
+  <footer>© 2026 BOUTIQUE LUNA - AGUA PRIETA</footer>
+</body>
+</html>

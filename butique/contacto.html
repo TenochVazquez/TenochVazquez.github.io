@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacto - Boutique Luna</title>
+  <style>
+    :root {
+      --primario: #880e4f;
+      --secundario: #fce4ec;
+      --blanco: #ffffff;
+    }
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #fafafa; }
+    header { background: var(--secundario); color: var(--primario); padding: 2rem; text-align: center; }
+    
+    .contact-container { 
+      max-width: 500px; 
+      margin: 4rem auto; 
+      background: var(--blanco); 
+      padding: 2.5rem; 
+      border-radius: 20px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    
+    h2 { color: var(--primario); text-align: center; margin-bottom: 2rem; font-weight: 300; }
+    
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group label { display: block; margin-bottom: 8px; color: #666; font-size: 0.9rem; }
+    
+    input, textarea { 
+      width: 100%; 
+      padding: 12px; 
+      border: 1px solid #ddd; 
+      border-radius: 8px; 
+      box-sizing: border-box; 
+      font-family: inherit;
+    }
+    
+    input:focus, textarea:focus { border-color: var(--primario); outline: none; background: #fffdfd; }
+    
+    .btn-submit { 
+      width: 100%; 
+      padding: 15px; 
+      background: var(--primario); 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      font-weight: bold; 
+      cursor: pointer; 
+      transition: opacity 0.3s;
+      margin-top: 1rem;
+    }
+    .btn-submit:hover { opacity: 0.9; }
+
+    .back-home { display: block; text-align: center; margin-top: 2rem; color: var(--primario); text-decoration: none; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1 style="margin:0; font-weight:300;">BOUTIQUE LUNA</h1>
+  </header>
+
+  <div class="contact-container">
+    <h2>Escríbenos</h2>
+    <form action="#" onsubmit="alert('Gracias, nos pondremos en contacto pronto'); return false;">
+      <div class="form-group">
+        <label>Nombre Completo</label>
+        <input type="text" placeholder="Ej. Juan Pérez" required>
+      </div>
+      <div class="form-group">
+        <label>Correo Electrónico</label>
+        <input type="email" placeholder="correo@ejemplo.com" required>
+      </div>
+      <div class="form-group">
+        <label>Mensaje</label>
+        <textarea rows="4" placeholder="¿En qué podemos ayudarte?"></textarea>
+      </div>
+      <button type="submit" class="btn-submit">ENVIAR MENSAJE</button>
+    </form>
+    <a href="index.html" class="back-home">← Volver al Inicio</a>
+  </div>
+
+</body>
+</html>

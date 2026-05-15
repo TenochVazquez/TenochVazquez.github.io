@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accesorios - Boutique Luna</title>
+  <style>
+    :root { --primario: #880e4f; --secundario: #fce4ec; --acento: #f8bbd9; --blanco: #fff; }
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #fafafa; }
+    .cart-float { position: fixed; bottom: 30px; right: 30px; background: var(--primario); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 8px 20px rgba(0,0,0,0.2); z-index: 1000; font-size: 1.8rem; }
+    header { background: var(--secundario); color: var(--primario); padding: 3rem 1rem; text-align: center; border-bottom: 1px solid var(--acento); }
+    header h1 { margin: 0; font-size: 2.5rem; font-weight: 300; text-transform: uppercase; }
+    .btn-back { display: inline-block; margin-top: 15px; padding: 10px 25px; border: 1px solid var(--primario); color: var(--primario); text-decoration: none; border-radius: 30px; font-weight: bold; transition: 0.3s; }
+    .btn-back:hover { background: var(--primario); color: white; }
+    .section { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem; }
+    .product-card { background: var(--blanco); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; text-align: center; transition: 0.3s; }
+    .product-card:hover { transform: translateY(-10px); }
+    .img-box { width: 100%; height: 400px; overflow: hidden; }
+    .img-box img { width: 100%; height: 100%; object-fit: cover; }
+    .info { padding: 2rem; }
+    .price { font-size: 1.5rem; color: var(--primario); font-weight: bold; margin-bottom: 1.5rem; display: block; }
+    .btn-add { width: 100%; padding: 15px; background: var(--primario); color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+    footer { text-align: center; padding: 3rem; background: var(--primario); color: white; margin-top: 4rem; }
+  </style>
+</head>
+<body>
+  <a href="carrito.html" class="cart-float">🛒</a>
+  <header><h1>Boutique Luna</h1><p>Accesorios y Complementos</p><a href="index.html" class="btn-back">← VOLVER AL INICIO</a></header>
+  <main class="section">
+    <div class="grid">
+      <div class="product-card">
+        <div class="img-box"><img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80"></div>
+        <div class="info"><h4>Bolso de Mano</h4><span class="price">$1,850 MXN</span>
+            <button class="btn-add" onclick="agregarAlCarrito('Bolso de Mano', 1850, 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80')">
+              Añadir al Carrito</button></div>
+      </div>
+      <div class="product-card">
+        <div class="img-box"><img src="https://images.unsplash.com/photo-1611085583191-a3b1a30dec5e?auto=format&fit=crop&w=800&q=80"></div>
+        <div class="info"><h4>Reloj Elegance</h4><span class="price">$2,100 MXN</span>
+          <button class="btn-add" onclick="agregarAlCarrito('Reloj Elegance', 2100, 'https://images.unsplash.com/photo-1611085583191-a3b1a30dec5e?auto=format&fit=crop&w=800&q=80')">
+            Añadir al Carrito</button></div>
+      </div>
+    </div>
+  </main>
+  <footer>© 2026 BOUTIQUE LUNA - AGUA PRIETA</footer>
+    <script>
+// Sistema de Carrito en Memoria
+function agregarAlCarrito(nombre, precio, imagen) {
+    // 1. Obtener el carrito actual o crear uno vacío
+    let carrito = JSON.parse(localStorage.getItem('carritoLuna')) || [];
+    
+    // 2. Agregar el nuevo producto
+    carrito.push({ nombre, precio, imagen });
+    
+    // 3. Guardar en la memoria del navegador
+    localStorage.setItem('carritoLuna', JSON.stringify(carrito));
+    
+    // 4. Mostrar mensaje elegante
+    mostrarNotificacion(nombre);
+}
+
+function mostrarNotificacion(nombre) {
+    // Crear el elemento de mensaje
+    const nota = document.createElement('div');
+    nota.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:20px;">✨</span>
+            <div>
+                <strong style="display:block;">¡Agregado!</strong>
+                <span style="font-size:12px;">${nombre} ya está en tu carrito.</span>
+            </div>
+        </div>
+    `;
+    
+    // Estilos del mensaje
+    Object.assign(nota.style, {
+        position: 'fixed',
+        bottom: '100px',
+        right: '20px',
+        backgroundColor: '#880e4f',
+        color: 'white',
+        padding: '15px 25px',
+        borderRadius: '15px',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+        zIndex: '2000',
+        fontFamily: 'Segoe UI, sans-serif',
+        animation: 'slideUp 0.5s ease forwards'
+    });
+
+    document.body.appendChild(nota);
+
+    // Animación de salida y eliminar
+    setTimeout(() => {
+        nota.style.animation = 'fadeOut 0.5s ease forwards';
+        setTimeout(() => nota.remove(), 500);
+    }, 3000);
+}
+
+// Estilos de las animaciones
+const styleSheet = document.createElement("style");
+styleSheet.innerText = `
+    @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+`;
+document.head.appendChild(styleSheet);
+</script>
+</body>
+</html>
