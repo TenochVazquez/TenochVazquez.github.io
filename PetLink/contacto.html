@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetLink | Soporte y Contacto</title>
+    <style>
+        :root {
+            --azul-claro: #a2d2ff;
+            --lila: #cdb4db;
+            --lila-oscuro: #b392ac;
+            --blanco: #ffffff;
+            --texto: #4c4c4c;
+            --gris-fondo: #fcfaff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, sans-serif; }
+        body { color: var(--texto); background-color: var(--gris-fondo); }
+        
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 10%; background: var(--blanco); box-shadow: 0 4px 20px rgba(179, 146, 172, 0.08); position: sticky; top: 0; z-index: 1000; }
+        .logo { font-size: 1.6rem; font-weight: 700; color: var(--lila-oscuro); text-decoration: none; }
+        .nav-links { display: flex; list-style: none; gap: 15px; }
+        .nav-links a { text-decoration: none; color: var(--texto); font-weight: 600; padding: 8px 16px; border-radius: 20px; transition: all 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--lila-oscuro); background: #f5eff7; }
+        
+        .container { max-width: 900px; margin: 50px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        h2 { font-size: 2rem; color: #333; margin-bottom: 15px; grid-column: 1 / -1; }
+        
+        .contact-form { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(179, 146, 172, 0.03); border: 1px solid rgba(205, 180, 219, 0.15); }
+        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+        .form-group label { font-size: 0.9rem; font-weight: 600; color: #555; }
+        .form-control { padding: 12px; border: 2px solid #f0edf5; border-radius: 10px; font-size: 1rem; outline: none; transition: 0.3s; }
+        .form-control:focus { border-color: var(--azul-claro); }
+        
+        .btn-submit { background: var(--azul-claro); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn-submit:hover { background: var(--lila-oscuro); }
+        
+        .faq-section { display: flex; flex-direction: column; gap: 20px; }
+        .faq-block { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(179, 146, 172, 0.02); border: 1px solid rgba(205, 180, 219, 0.1); }
+        .faq-block h3 { color: var(--lila-oscuro); margin-bottom: 8px; font-size: 1.2rem; font-weight: 700; }
+        .faq-block p { color: #666; line-height: 1.6; font-size: 0.95rem; }
+
+        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.95rem; animation: slideIn 0.3s ease forwards; border-left: 5px solid var(--azul-claro); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">🐾 PetLink</a>
+        <ul class="nav-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="comunidad.html">Comunidad</a></li>
+            <li><a href="servicios.html">Servicios</a></li>
+            <li><a href="salud.html">Salud</a></li>
+            <li><a href="contacto.html" class="active">Contacto</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>Atención al Usuario y Soporte</h2>
+
+        <div class="contact-form">
+            <form id="ticketForm">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" class="form-control" required placeholder="Tu nombre">
+                </div>
+                <div class="form-group">
+                    <label>Correo Electrónico de Cuenta</label>
+                    <input type="email" class="form-control" required placeholder="correo@ejemplo.com">
+                </div>
+                <div class="form-group">
+                    <label>Mensaje o Reporte Técnico</label>
+                    <textarea class="form-control" rows="4" style="resize:none;" required placeholder="Describe tu inconveniente..."></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Enviar Ticket de Soporte</button>
+            </form>
+        </div>
+
+        <div class="faq-section">
+            <div class="faq-block">
+                <h3>¿Cómo se gestionan mis datos de perfil?</h3>
+                <p>Toda la información del carnet de salud y publicaciones se asocia de forma segura a tu cuenta en los servidores centrales de la red de PetLink.</p>
+            </div>
+            <div class="faq-block">
+                <h3>¿El soporte técnico tiene algún costo?</h3>
+                <p>No, la mesa de ayuda para incidencias en la plataforma en línea es totalmente gratuita para los miembros registrados.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        document.getElementById('ticketForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = "¡Ticket enviado con éxito! Te responderemos pronto.";
+            container.appendChild(toast);
+            
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+            e.target.reset();
+        });
+    </script>
+</body>
+</html>

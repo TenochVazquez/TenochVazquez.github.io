@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetLink | Salud</title>
+    <style>
+        :root {
+            --azul-claro: #a2d2ff;
+            --lila: #cdb4db;
+            --lila-oscuro: #b392ac;
+            --blanco: #ffffff;
+            --texto: #4c4c4c;
+            --gris-fondo: #fcfaff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, sans-serif; }
+        body { color: var(--texto); background-color: var(--gris-fondo); }
+        
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 10%; background: var(--blanco); box-shadow: 0 4px 20px rgba(179, 146, 172, 0.08); position: sticky; top: 0; z-index: 1000; }
+        .logo { font-size: 1.6rem; font-weight: 700; color: var(--lila-oscuro); text-decoration: none; }
+        .nav-links { display: flex; list-style: none; gap: 15px; }
+        .nav-links a { text-decoration: none; color: var(--texto); font-weight: 600; padding: 8px 16px; border-radius: 20px; transition: all 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--lila-oscuro); background: #f5eff7; }
+        
+        .container { max-width: 850px; margin: 50px auto; padding: 0 20px; }
+        h2 { font-size: 2rem; color: #333; margin-bottom: 5px; }
+        
+        .form-container { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(179, 146, 172, 0.04); margin-bottom: 35px; border: 1px solid rgba(205, 180, 219, 0.2); display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 0.85rem; font-weight: 600; color: #666; }
+        .form-control { padding: 10px; border: 2px solid #f0edf5; border-radius: 8px; font-size: 0.95rem; outline: none; transition: 0.3s; }
+        .form-control:focus { border-color: var(--lila); }
+        .btn-add { background: var(--lila-oscuro); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-add:hover { background: var(--lila); }
+
+        .carnet-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .item-medico { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(179, 146, 172, 0.03); display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(205, 180, 219, 0.15); border-left: 6px solid var(--azul-claro); }
+        
+        .info-medica h3 { color: #333; font-size: 1.25rem; margin-bottom: 4px; }
+        .info-medica p { color: #666; font-size: 0.95rem; margin-bottom: 2px; }
+        
+        .actions-cell { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+        .status-badge { padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; text-align: center; display: inline-block; width: 110px; }
+        .status-ok { background: #d1fae5; color: #065f46; }
+        .status-alert { background: #ffedd5; color: #9a3412; }
+        
+        .row-buttons { display: flex; gap: 8px; }
+        .btn-action { border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+        .btn-edit { background: #f3f4f6; color: #4b5563; }
+        .btn-edit:hover { background: #e5e7eb; }
+        .btn-del-pet { background: #fee2e2; color: #dc2626; }
+        .btn-del-pet:hover { background: #fca5a5; }
+
+        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.95rem; animation: slideIn 0.3s ease forwards; border-left: 5px solid var(--azul-claro); }
+        .toast.error { border-left-color: #ef4444; background: #fef2f2; color: #991b1b; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">🐾 PetLink</a>
+        <ul class="nav-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="comunidad.html">Comunidad</a></li>
+            <li><a href="servicios.html">Servicios</a></li>
+            <li><a href="salud.html" class="active">Salud</a></li>
+            <li><a href="contacto.html">Contacto</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>Historial de Salud Digital</h2>
+        <p style="color: #888; margin-bottom: 30px; font-size: 1.05rem;">Monitorea de forma centralizada las vacunas y el estatus clínico de cada paciente.</p>
+
+        <div class="form-container">
+            <div class="form-group">
+                <label>Nombre Mascota</label>
+                <input type="text" id="petName" class="form-control" placeholder="Ej: Toby">
+            </div>
+            <div class="form-group">
+                <label>Tratamiento / Vacuna</label>
+                <input type="text" id="petTreat" class="form-control" placeholder="Ej: Rabia">
+            </div>
+            <div class="form-group">
+                <label>Estatus</label>
+                <select id="petStatus" class="form-control">
+                    <option value="APLICADA">Aplicada</option>
+                    <option value="PENDIENTE">Pendiente</option>
+                </select>
+            </div>
+            <button class="btn-add" id="btnAgregarMascota">Agregar Ficha</button>
+        </div>
+
+        <div class="carnet-grid" id="carnetMascotas">
+            <div class="item-medico">
+                <div class="info-medica">
+                    <h3>💉 Vacuna Quíntuple Canina</h3>
+                    <p>Mascota: <strong class="name-target">Toby</strong></p>
+                    <p>Especialista: Dr. Carlos Mendoza</p>
+                </div>
+                <div class="actions-cell">
+                    <span class="status-badge status-ok">APLICADA</span>
+                    <div class="row-buttons">
+                        <button class="btn-action btn-edit" onclick="toggleStatus(this)">Cambiar Estado</button>
+                        <button class="btn-action btn-del-pet" onclick="this.closest('.item-medico').remove(); showToast('Ficha eliminada.', 'error')">Quitar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+            toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        document.getElementById('btnAgregarMascota').addEventListener('click', () => {
+            const name = document.getElementById('petName');
+            const treat = document.getElementById('petTreat');
+            const status = document.getElementById('petStatus');
+
+            if(!name.value.trim() || !treat.value.trim()) {
+                showToast("Faltan datos para crear la ficha médica.", "error");
+                return;
+            }
+
+            const isOk = status.value === "APLICADA";
+            const item = document.createElement('div');
+            item.className = 'item-medico';
+            item.style.borderLeft = '6px solid ' + (isOk ? 'var(--azul-claro)' : 'var(--lila-oscuro)');
+            
+            item.innerHTML = `
+                <div class="info-medica">
+                    <h3>📋 ${treat.value}</h3>
+                    <p>Mascota: <strong class="name-target">${name.value}</strong></p>
+                    <p>Especialista: Registro del Sistema</p>
+                </div>
+                <div class="actions-cell">
+                    <span class="status-badge ${isOk ? 'status-ok' : 'status-alert'}">${status.value}</span>
+                    <div class="row-buttons">
+                        <button class="btn-action btn-edit" onclick="toggleStatus(this)">Cambiar Estado</button>
+                        <button class="btn-action btn-del-pet" onclick="this.closest('.item-medico').remove(); showToast('Ficha de mascota removida.', 'error')">Quitar</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('carnetMascotas').appendChild(item);
+            showToast(`Ficha de ${name.value} agregada correctamente.`);
+            name.value = '';
+            treat.value = '';
+        });
+
+        function toggleStatus(btn) {
+            const container = btn.closest('.item-medico');
+            const badge = container.querySelector('.status-badge');
+            if(badge.classList.contains('status-ok')) {
+                badge.className = "status-badge status-alert";
+                badge.innerText = "PENDIENTE";
+                container.style.borderLeftColor = "var(--lila-oscuro)";
+                showToast("Estatus cambiado a Pendiente.");
+            } else {
+                badge.className = "status-badge status-ok";
+                badge.innerText = "APLICADA";
+                container.style.borderLeftColor = "var(--azul-claro)";
+                showToast("Estatus cambiado a Aplicada.");
+            }
+        }
+    </script>
+</body>
+</html>

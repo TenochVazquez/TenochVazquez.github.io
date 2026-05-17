@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetLink | Servicios</title>
+    <style>
+        :root {
+            --azul-claro: #a2d2ff;
+            --lila: #cdb4db;
+            --lila-oscuro: #b392ac;
+            --blanco: #ffffff;
+            --texto: #4c4c4c;
+            --gris-fondo: #fcfaff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, sans-serif; }
+        body { color: var(--texto); background-color: var(--gris-fondo); }
+        
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 10%; background: var(--blanco); box-shadow: 0 4px 20px rgba(179, 146, 172, 0.08); position: sticky; top: 0; z-index: 1000; }
+        .logo { font-size: 1.6rem; font-weight: 700; color: var(--lila-oscuro); text-decoration: none; }
+        .nav-links { display: flex; list-style: none; gap: 15px; }
+        .nav-links a { text-decoration: none; color: var(--texto); font-weight: 600; padding: 8px 16px; border-radius: 20px; transition: all 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--lila-oscuro); background: #f5eff7; }
+        
+        .container { max-width: 1100px; margin: 50px auto; padding: 0 20px; }
+        h2 { font-size: 2rem; color: #333; margin-bottom: 5px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-top: 35px; }
+        .card-servicio { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(179, 146, 172, 0.04); border: 1px solid rgba(205, 180, 219, 0.15); transition: all 0.3s ease; display: flex; flex-direction: column; justify-content: space-between; }
+        .card-servicio:hover { transform: translateY(-4px); box-shadow: 0 15px 35px rgba(179, 146, 172, 0.09); border-color: var(--lila); }
+        
+        .card-body h3 { color: var(--lila-oscuro); margin-bottom: 12px; font-size: 1.35rem; font-weight: 700; }
+        .card-body p { margin-bottom: 8px; color: #555; font-size: 0.95rem; }
+        .card-body strong { color: #333; }
+        
+        .review-text { color: #777; margin-top: 15px; font-style: italic; font-size: 0.95rem; border-top: 1px dashed #f0edf5; padding-top: 12px; }
+        .tag-emergencia { background: #fee2e2; color: #dc2626; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; float: right; letter-spacing: 0.5px; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">🐾 PetLink</a>
+        <ul class="nav-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="comunidad.html">Comunidad</a></li>
+            <li><a href="servicios.html" class="active">Servicios</a></li>
+            <li><a href="salud.html">Salud</a></li>
+            <li><a href="contacto.html">Contacto</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>Directorio Clínico y de Cuidado</h2>
+        <p style="color: #888; font-size: 1.05rem;">Contactos y establecimientos locales guardados directamente en el almacenamiento de tu dispositivo.</p>
+
+        <div class="grid">
+            <div class="card-servicio">
+                <div class="card-body">
+                    <span class="tag-emergencia">24 HORAS</span>
+                    <h3>Clínica Veterinaria Central</h3>
+                    <p><strong>Dirección:</strong> Av. 6 entre calles 5 y 6</p>
+                    <p><strong>Teléfono:</strong> 633-123-4567</p>
+                    <p class="review-text">"Atención médica experta para urgencias quirúrgicas, análisis clínicos y consultas generales nocturnas."</p>
+                </div>
+            </div>
+
+            <div class="card-servicio">
+                <div class="card-body">
+                    <h3>Estética Canina Guau</h3>
+                    <p><strong>Dirección:</strong> Calle 12 y Av. 15</p>
+                    <p><strong>Teléfono:</strong> 633-987-6543</p>
+                    <p class="review-text">"Especialistas en cortes de raza, baños cosméticos y medicados, cepillado dental y corte de garras seguro."</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

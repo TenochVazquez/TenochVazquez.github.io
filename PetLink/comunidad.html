@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetLink | Comunidad</title>
+    <style>
+        :root {
+            --azul-claro: #a2d2ff;
+            --lila: #cdb4db;
+            --lila-oscuro: #b392ac;
+            --blanco: #ffffff;
+            --texto: #4c4c4c;
+            --gris-fondo: #fcfaff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, sans-serif; }
+        body { color: var(--texto); background-color: var(--gris-fondo); }
+        
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 10%; background: var(--blanco); box-shadow: 0 4px 20px rgba(179, 146, 172, 0.08); position: sticky; top: 0; z-index: 1000; }
+        .logo { font-size: 1.6rem; font-weight: 700; color: var(--lila-oscuro); text-decoration: none; }
+        .nav-links { display: flex; list-style: none; gap: 15px; }
+        .nav-links a { text-decoration: none; color: var(--texto); font-weight: 600; padding: 8px 16px; border-radius: 20px; transition: all 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--lila-oscuro); background: #f5eff7; }
+        
+        .container { max-width: 750px; margin: 50px auto; padding: 0 20px; }
+        h2 { font-size: 2rem; color: #333; margin-bottom: 5px; }
+        
+        .publish-box { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(179, 146, 172, 0.04); margin-bottom: 35px; border: 1px solid rgba(205, 180, 219, 0.2); }
+        .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 12px; }
+        .post-field { width: 100%; padding: 12px; border: 2px solid #f0edf5; border-radius: 10px; font-size: 0.95rem; transition: all 0.3s; color: var(--texto); }
+        .post-input { width: 100%; padding: 16px; border: 2px solid #f0edf5; border-radius: 12px; resize: none; font-size: 1rem; margin-bottom: 12px; transition: all 0.3s; color: var(--texto); }
+        .post-field:focus, .post-input:focus { outline: none; border-color: var(--lila); box-shadow: 0 0 0 3px rgba(205, 180, 219, 0.2); }
+        
+        .btn-post { background: var(--azul-claro); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: 600; cursor: pointer; float: right; transition: all 0.3s; box-shadow: 0 4px 12px rgba(162, 210, 255, 0.3); }
+        .btn-post:hover { background: var(--lila); transform: translateY(-1px); box-shadow: 0 6px 15px rgba(205, 180, 219, 0.4); }
+        
+        .feed-item { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(179, 146, 172, 0.03); margin-bottom: 25px; border: 1px solid rgba(205, 180, 219, 0.15); position: relative; }
+        .feed-item h4 { color: var(--lila-oscuro); margin-bottom: 3px; font-size: 1.1rem; }
+        .feed-item h5 { color: #333; font-size: 1rem; margin-bottom: 8px; font-weight: 600; }
+        .feed-item p { color: #555; font-size: 1.05rem; }
+        
+        .badge { background: #f0f7ff; color: #2b70c9; padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-top: 15px; }
+        .btn-delete { position: absolute; top: 20px; right: 20px; background: #fee2e2; color: #dc2626; border: none; padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-delete:hover { background: #fca5a5; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">🐾 PetLink</a>
+        <ul class="nav-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="comunidad.html" class="active">Comunidad</a></li>
+            <li><a href="servicios.html">Servicios</a></li>
+            <li><a href="salud.html">Salud</a></li>
+            <li><a href="contacto.html">Contacto</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>Muro de la Comunidad</h2>
+        <p style="color: #888; margin-bottom: 30px; font-size: 1.05rem;">Comparte reportes, fotos o noticias con toda la red de PetLink.</p>
+
+        <div class="publish-box">
+            <div class="input-group">
+                <input type="text" id="autor" class="post-field" placeholder="Tu Nombre Completo">
+                <input type="text" id="asunto" class="post-field" placeholder="Asunto (Ej: Mascota Perdida)">
+            </div>
+            <textarea id="mensaje" class="post-input" rows="3" placeholder="¿Qué quieres compartir con la comunidad hoy?"></textarea>
+            <button class="btn-post" id="btnPublicar">Publicar en el Muro</button>
+            <div style="clear: both;"></div>
+        </div>
+
+        <div id="muro">
+            <!-- Publicación preestablecida (Sin botón de eliminar) -->
+            <div class="feed-item">
+                <h4>👤 Héctor Flores</h4>
+                <h5>📍 Se busca perrita Husky</h5>
+                <p>"Perdida por el área de la calle 10. Lleva un collar de color rosa con su placa de identificación."</p>
+                <span class="badge">Hace 30 min</span>
+            </div>
+            
+            <div class="feed-item">
+                <h4>👤 Clara Luz</h4>
+                <h5>📍 Campaña de Esterilización</h5>
+                <p>"¡Hola a todos! Les comparto que mañana por la mañana habrá una campaña masiva de esterilización gratuita en el domo del parque central."</p>
+                <span class="badge">Hace 4 horas</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('btnPublicar').addEventListener('click', () => {
+            const autor = document.getElementById('autor');
+            const asunto = document.getElementById('asunto');
+            const mensaje = document.getElementById('mensaje');
+
+            if(!autor.value.trim() || !asunto.value.trim() || !mensaje.value.trim()) {
+                alert("Por favor completa todos los campos.");
+                return;
+            }
+            
+            const item = document.createElement('div');
+            item.className = 'feed-item';
+            item.style.borderLeft = '5px solid var(--azul-claro)';
+            
+            // Aquí se inyecta el botón de borrar solo para tus publicaciones nuevas
+            item.innerHTML = `
+                <button class="btn-delete" onclick="this.parentElement.remove()">Eliminar</button>
+                <h4>👤 ${autor.value}</h4>
+                <h5>📍 ${asunto.value}</h5>
+                <p>"${mensaje.value}"</p>
+                <span class="badge" style="background: #ecfdf5; color: #065f46;">Publicado ahora mismo</span>
+            `;
+            
+            const muro = document.getElementById('muro');
+            muro.insertBefore(item, muro.firstChild);
+            
+            autor.value = '';
+            asunto.value = '';
+            mensaje.value = '';
+        });
+    </script>
+</body>
+</html>
